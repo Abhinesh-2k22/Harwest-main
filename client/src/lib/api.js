@@ -62,12 +62,10 @@ export const api = {
   updateEnquiryStatus: (id, status) => request(`/enquiries/${id}`, { method: 'PATCH', body: { status } }),
   deleteEnquiry: (id) => request(`/enquiries/${id}`, { method: 'DELETE' }),
 
-  // --- Products (Admin CRUD + Public Fetch) ---
+  // --- Products (fixed catalogue: public fetch + admin detail updates only) ---
   getProducts: () => request('/products'),
   getAllProducts: () => request('/products/all'),
-  createProduct: (data) => request('/products', { method: 'POST', body: data }),
   updateProduct: (id, data) => request(`/products/${id}`, { method: 'PUT', body: data }),
-  deleteProduct: (id) => request(`/products/${id}`, { method: 'DELETE' }),
 
   // --- Blog Posts (Admin CRUD + Public Fetch) ---
   getBlogs: (category, search) => {

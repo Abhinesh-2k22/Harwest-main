@@ -11,6 +11,8 @@ export const SITE = {
   socials: [
     { label: 'LinkedIn', href: 'https://www.linkedin.com/in/selvakumar-govindasamy-4a9516198?utm_source=share_via&utm_content=profile&utm_medium=member_android' },
     { label: 'Instagram', href: 'https://www.instagram.com/harwestcoirs?utm_source=qr&srtk=NzZzYmVkOWhlOTJ4' },
+    // TODO: replace with the real Facebook page link
+    { label: 'Facebook', href: 'https://www.facebook.com/harwestcoirs' },
     { label: 'YouTube', href: 'https://youtube.com' },
   ],
 };
@@ -68,52 +70,63 @@ export const CERTIFICATIONS = [
   },
 ];
 
+export const PRODUCT_CATEGORIES = [
+  'Coir Pith',
+  'Compressed Blocks',
+  'Husk Chips',
+  'Grow Slabs',
+  'Grow Bags',
+  'Hydroponics',
+  'Coir Fibre',
+  'Horticulture',
+];
+
+// Offline fallback only � the live catalogue comes from the database (editable in Admin).
 export const PRODUCTS = [
   {
-    id: 'block',
-    image: 'https://res.cloudinary.com/yi8e4nqo/image/upload/v1793173307/harwest/block.jpg',
-    name: 'Cocopeat 5kg Block',
-    category: 'Compressed Coir',
-    short: 'Premium compressed, triple-washed, low-EC cocopeat block expanding to ~75 litres of airy substrate.',
-    specs: {
-      'Weight': '5 kg (+/- 200g)',
-      'Expansion': '70 – 75 Litres',
-      'Electrical Conductivity (EC)': '< 0.5 mS/cm (Washed & Desalinated)',
-      'pH Range': '5.5 – 6.5',
-      'Moisture Content': '< 18%',
-      'Sieve Mesh': 'Fine sieved (unwanted fibres & baby dust removed)',
-      'Packing': '220 blocks / pallet, ~24 MT per 40ft HC container',
-    },
+    id: 'coir-pith-blocks',
+    name: 'Coir Pith 5kg Block & 650g Block',
+    categories: ['Coir Pith', 'Compressed Blocks', 'Horticulture'],
+    variants: ['5 kg Low EC Coir Pith Block', '5 kg High EC Coir Pith Block', '650 grams Block'],
+    image: '/images/block.jpg',
+    short: 'Compressed coir pith blocks in 5 kg and 650 g sizes, available in Low EC and High EC grades. Expands into a light, airy, water-retentive growing medium.',
+    specs: { 'Available Sizes': '5 kg Block / 650 g Block', 'EC Grades': 'Low EC / High EC (5 kg)' },
   },
   {
-    id: 'growbag',
-    image: 'https://res.cloudinary.com/yi8e4nqo/image/upload/v1793173308/harwest/growbags.jpg',
-    name: 'Hydroponic Coir Grow Bags',
-    category: 'Hydroponics',
-    short: 'Pre-cut UV-stabilised grow slabs engineered with coco peat & chips matrix for tomatoes, cucumbers and berries.',
-    specs: {
-      'Standard Size': '100 × 15 × 10 cm / 100 × 20 × 10 cm',
-      'Blend Ratio': '70% Cocopeat + 30% Crushed Husk Chips (Customisable)',
-      'Electrical Conductivity (EC)': '< 0.6 mS/cm',
-      'pH Range': '5.5 – 6.5',
-      'Outer Sleeve': 'White/Black Co-extruded 3-year UV stabilised bag',
-      'Pre-drilled Holes': 'Drainage slits and plant hole cutouts pre-punched on order',
-    },
+    id: 'coco-husk-chips',
+    name: 'Coco Husk Chips',
+    categories: ['Husk Chips', 'Horticulture'],
+    variants: ['Coco Husk Chips', 'Coco Husk Chips Mix'],
+    image: '/images/chips.jpg',
+    short: 'Evenly cut coconut husk chips giving superior drainage and aeration. Available as pure husk chips or as a chips mix blended with coir pith.',
+    specs: { Types: 'Coco Husk Chips / Coco Husk Chips Mix' },
   },
   {
-    id: 'chips',
-    image: 'https://res.cloudinary.com/yi8e4nqo/image/upload/v1793173311/harwest/chips.jpg',
-    name: 'Coco Husk Chips & Briquettes',
-    category: 'Husk Chips',
-    short: 'Evenly cut coconut husk cubes providing superior drainage, aeration and orchid potting media structure.',
-    specs: {
-      'Chip Grade': 'Medium (8–14 mm) / Large (12–20 mm)',
-      'Expansion Volume': '5× dry compacted volume',
-      'Electrical Conductivity (EC)': '< 0.5 mS/cm',
-      'pH Range': '5.5 – 6.5',
-      'Packing': '5 kg blocks, 10 kg briquettes, or loose polybags',
-      'Ideal Use': 'Orchids, Anthuriums, Hydroponic root zones & potting mix blends',
-    },
+    id: 'coir-grow-slabs',
+    name: 'Coir Grow Slabs',
+    categories: ['Grow Slabs', 'Hydroponics'],
+    variants: [],
+    image: '/images/growbags.jpg',
+    short: 'Ready-to-use coir grow slabs for soilless cultivation of tomatoes, cucumbers, peppers and berries.',
+    specs: {},
+  },
+  {
+    id: 'open-top-grow-bags',
+    name: 'Open Top Grow Bags',
+    categories: ['Grow Bags', 'Hydroponics'],
+    variants: ['Open Top Grow Bag', 'Cocopeat Grow Bags', 'Slab Type'],
+    image: '/images/growbags.jpg',
+    short: 'Cocopeat-filled grow bags in open top and slab type formats for greenhouse and open-field crops.',
+    specs: { Types: 'Open Top Grow Bag / Cocopeat Grow Bags / Slab Type' },
+  },
+  {
+    id: 'coconut-fiber',
+    name: 'Coconut Fiber',
+    categories: ['Coir Fibre'],
+    variants: [],
+    image: '/images/factory.jpg',
+    short: 'Natural coconut coir fibre extracted from mature husks, for horticulture and industrial use.',
+    specs: {},
   },
 ];
 

@@ -18,9 +18,31 @@ function Row({ p, flip, index }) {
         />
       </div>
       <div>
+        {(p.categories || []).length > 0 && (
+          <div className="mb-3 flex flex-wrap gap-2">
+            {p.categories.map((c) => (
+              <span key={c} className="rounded-full border border-leaf-200 bg-leaf-50 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-leaf-800">
+                {c}
+              </span>
+            ))}
+          </div>
+        )}
         <h2 className="text-3xl sm:text-4xl font-bold text-shell-900">{p.name}</h2>
         <p className="mt-3 text-base sm:text-lg text-shell-700 leading-relaxed">{p.short}</p>
 
+        {(p.variants || []).length > 0 && (
+          <div className="mt-5">
+            <p className="text-xs font-bold uppercase tracking-widest text-shell-500">Available Types</p>
+            <ul className="mt-2 grid gap-2 sm:grid-cols-2">
+              {p.variants.map((v) => (
+                <li key={v} className="flex items-center gap-2 rounded-xl border border-shell-200 bg-white px-3.5 py-2.5 text-sm font-semibold text-shell-800 shadow-sm">
+                  <span className="h-2 w-2 shrink-0 rounded-full bg-leaf-500" />
+                  {v}
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         {Object.keys(specs).length > 0 && (
           <dl className="mt-6 divide-y divide-shell-200 overflow-hidden rounded-2xl bg-white shadow-sm border border-shell-200/80">
             {Object.entries(specs).map(([k, v]) => (

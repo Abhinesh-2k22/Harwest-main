@@ -30,7 +30,7 @@ import {
 import { api } from '../lib/api';
 import { ASSET_DEFAULTS, ASSET_GROUPS } from '../config/assets';
 import { useMedia } from '../context/MediaContext';
-import { FAQ as FALLBACK_FAQS, DEFAULT_BLOGS } from '../config/siteContent';
+import { FAQ as FALLBACK_FAQS, DEFAULT_BLOGS, PRODUCT_CATEGORIES } from '../config/siteContent';
 import GrowLoader from '../components/GrowLoader';
 
 const inputCls =
@@ -249,21 +249,36 @@ function EnquiriesTab() {
                   </div>
                 </div>
 
-                {/* Product / Volume Meta */}
-                {(enq.product || enq.volume) && (
-                  <div className="mt-4 flex flex-wrap gap-2 text-xs">
-                    {enq.product && (
-                      <span className="rounded-lg bg-shell-100 px-2.5 py-1 font-semibold text-shell-800">
-                        📦 Product: {enq.product}
-                      </span>
-                    )}
-                    {enq.volume && (
-                      <span className="rounded-lg bg-shell-100 px-2.5 py-1 font-semibold text-shell-800">
-                        🚢 Est. Volume: {enq.volume}
-                      </span>
-                    )}
-                  </div>
-                )}
+                {/* Type / Company / Location / Product / Volume Meta */}
+                <div className="mt-4 flex flex-wrap gap-2 text-xs">
+                  <span
+                    className={`rounded-lg px-2.5 py-1 font-bold ${
+                      enq.enquiryType === 'domestic' ? 'bg-amber-100 text-amber-900' : 'bg-leaf-100 text-leaf-900'
+                    }`}
+                  >
+                    {enq.enquiryType === 'domestic' ? '🇮🇳 Domestic' : '🌍 International'}
+                  </span>
+                  {enq.company && (
+                    <span className="rounded-lg bg-shell-100 px-2.5 py-1 font-semibold text-shell-800">
+                      🏢 {enq.company}
+                    </span>
+                  )}
+                  {(enq.country || enq.state) && (
+                    <span className="rounded-lg bg-shell-100 px-2.5 py-1 font-semibold text-shell-800">
+                      📍 {enq.enquiryType === 'domestic' ? `State: ${enq.state}` : `Country: ${enq.country}`}
+                    </span>
+                  )}
+                  {enq.product && (
+                    <span className="rounded-lg bg-shell-100 px-2.5 py-1 font-semibold text-shell-800">
+                      📦 Product: {enq.product}
+                    </span>
+                  )}
+                  {enq.volume && (
+                    <span className="rounded-lg bg-shell-100 px-2.5 py-1 font-semibold text-shell-800">
+                      🚢 Est. Volume: {enq.volume}
+                    </span>
+                  )}
+                </div>
 
                 {/* Message Body */}
                 <div className="mt-3.5 rounded-xl bg-shell-50/80 p-4 text-sm leading-relaxed text-shell-800 whitespace-pre-wrap border border-shell-100">
@@ -293,11 +308,11 @@ function ProductsTab() {
 
   const EMPTY_FORM = {
     name: '',
-    slug: '',
     short: '',
     image: '',
     specsText: '',
-    order: 0,
+    variantsText: '',
+    categories: [],
     isActive: true,
   };
   const [form, setForm] = useState(EMPTY_FORM);
@@ -339,25 +354,25 @@ function ProductsTab() {
     load();
   }, [load]);
 
-  const openNew = () => {
-    setEditing(null);
-    setForm({ ...EMPTY_FORM, order: products.length + 1 });
-    setModalOpen(true);
-  };
-
   const openEdit = (p) => {
     setEditing(p);
     setForm({
       name: p.name || '',
-      slug: p.slug || '',
       short: p.short || '',
       image: p.image || '',
       specsText: specsToText(p.specs),
-      order: p.order || 0,
+      variantsText: (p.variants || []).join('\n'),
+      categories: Array.isArray(p.categories) ? p.categories : [],
       isActive: p.isActive !== false,
     });
     setModalOpen(true);
   };
+
+  const toggleCategory = (c) =>
+    setForm((prev) => ({
+      ...prev,
+      categories: prev.categories.includes(c) ? prev.categories.filter((x) => x !== c) : [...prev.categories, c],
+    }));
 
   const toggleActive = async (p) => {
     try {
@@ -384,16 +399,16 @@ function ProductsTab() {
 
   const submit = async (e) => {
     e.preventDefault();
+    if (!editing?._id) return;
     setBusy(true);
     try {
-      const { specsText, slug, ...rest } = form;
-      const payload = { ...rest, specs: textToSpecs(specsText) };
-      if (slug.trim()) payload.slug = slug.trim();
-      if (editing && editing._id) {
-        await api.updateProduct(editing._id, payload);
-      } else {
-        await api.createProduct(payload);
-      }
+      const { specsText, variantsText, ...rest } = form;
+      const payload = {
+        ...rest,
+        specs: textToSpecs(specsText),
+        variants: variantsText.split('\n').map((v) => v.trim()).filter(Boolean),
+      };
+      await api.updateProduct(editing._id, payload);
       setModalOpen(false);
       await load();
     } catch (er) {
@@ -402,32 +417,15 @@ function ProductsTab() {
     setBusy(false);
   };
 
-  const remove = async (id) => {
-    if (!id) return;
-    if (!window.confirm('Delete this product permanently?')) return;
-    try {
-      await api.deleteProduct(id);
-      await load();
-    } catch (er) {
-      alert(er.message);
-    }
-  };
-
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-shell-900">Products Catalog Management</h2>
+          <h2 className="text-2xl font-bold text-shell-900">Products Catalog</h2>
           <p className="text-sm text-shell-600">
-            Add, update, or remove export coir substrates displayed across the website.
+            Update the details, photo, categories and types of your products. The product list itself is fixed.
           </p>
         </div>
-        <button
-          onClick={openNew}
-          className="flex items-center gap-2 rounded-xl bg-leaf-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-leaf-700"
-        >
-          <Plus size={16} /> Add New Product
-        </button>
       </div>
 
       {loadError && (
@@ -461,10 +459,23 @@ function ProductsTab() {
                   <span className="text-xs font-semibold text-leaf-800">
                     Product #{p.order ?? idx + 1}
                   </span>
-                  <span className="text-xs text-shell-400">Slug: {p.slug || 'auto'}</span>
                 </div>
                 <h3 className="mt-2 text-lg font-bold text-shell-900">{p.name}</h3>
-                <p className="mt-1 text-xs text-shell-600 line-clamp-3 leading-relaxed">{p.short}</p>
+                {(p.categories || []).length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {p.categories.map((c) => (
+                      <span key={c} className="rounded-full bg-leaf-50 px-2 py-0.5 text-[10px] font-bold text-leaf-800 border border-leaf-200">
+                        {c}
+                      </span>
+                    ))}
+                  </div>
+                )}
+                <p className="mt-2 text-xs text-shell-600 line-clamp-3 leading-relaxed">{p.short}</p>
+                {(p.variants || []).length > 0 && (
+                  <p className="mt-2 text-[11px] text-shell-500">
+                    <span className="font-semibold text-shell-700">Types:</span> {p.variants.join(' · ')}
+                  </p>
+                )}
               </div>
 
               <div className="mt-5 flex items-center justify-between border-t border-shell-100 pt-3">
@@ -483,20 +494,11 @@ function ProductsTab() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => openEdit(p)}
-                    className="rounded-lg border border-shell-200 p-2 text-shell-700 hover:bg-shell-50"
-                    title="Edit product"
+                    className="flex items-center gap-1.5 rounded-lg border border-shell-200 px-3 py-2 text-xs font-bold text-shell-700 hover:bg-shell-50"
+                    title="Edit product details"
                   >
-                    <Edit3 size={15} />
+                    <Edit3 size={14} /> Edit details
                   </button>
-                  {p._id && (
-                    <button
-                      onClick={() => remove(p._id)}
-                      className="rounded-lg border border-red-200 p-2 text-red-600 hover:bg-red-50"
-                      title="Delete product"
-                    >
-                      <Trash2 size={15} />
-                    </button>
-                  )}
                 </div>
               </div>
             </div>
@@ -510,7 +512,7 @@ function ProductsTab() {
           <div className="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white p-7 shadow-2xl">
             <div className="flex items-center justify-between border-b border-shell-100 pb-4">
               <h3 className="font-head text-xl font-bold text-shell-900">
-                {editing ? 'Edit Product' : 'Add New Product'}
+                {editing ? `Edit: ${editing.name}` : 'Edit Product'}
               </h3>
               <button
                 onClick={() => setModalOpen(false)}
@@ -534,29 +536,46 @@ function ProductsTab() {
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-shell-700">
-                    Custom Slug (Optional)
-                  </label>
-                  <input
-                    className={inputCls}
-                    placeholder="e.g. cocopeat-5kg-block"
-                    value={form.slug}
-                    onChange={(e) => setForm({ ...form, slug: e.target.value })}
-                  />
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-shell-700">
+                  Categories (select one or more)
+                </label>
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {PRODUCT_CATEGORIES.map((c) => {
+                    const on = form.categories.includes(c);
+                    return (
+                      <button
+                        key={c}
+                        type="button"
+                        onClick={() => toggleCategory(c)}
+                        aria-pressed={on}
+                        className={`rounded-full border px-3 py-1.5 text-xs font-bold transition ${
+                          on
+                            ? 'border-leaf-600 bg-leaf-600 text-white shadow-sm'
+                            : 'border-shell-300 bg-white text-shell-700 hover:border-leaf-400 hover:bg-leaf-50'
+                        }`}
+                      >
+                        {on ? '✓ ' : ''}{c}
+                      </button>
+                    );
+                  })}
                 </div>
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-shell-700">
-                    Display Order
-                  </label>
-                  <input
-                    type="number"
-                    className={inputCls}
-                    value={form.order}
-                    onChange={(e) => setForm({ ...form, order: Number(e.target.value) })}
-                  />
-                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-shell-700">
+                  Product Types / Sub-products (one per line)
+                </label>
+                <textarea
+                  rows={4}
+                  className={inputCls}
+                  placeholder={'5 kg Low EC Coir Pith Block\n5 kg High EC Coir Pith Block\n650 grams Block'}
+                  value={form.variantsText}
+                  onChange={(e) => setForm({ ...form, variantsText: e.target.value })}
+                />
+                <p className="mt-1 text-[11px] text-shell-500">
+                  These appear on the Products page and in the Enquiry form's product dropdown.
+                </p>
               </div>
 
               <div>
@@ -653,7 +672,7 @@ function ProductsTab() {
                   disabled={busy}
                   className="rounded-xl bg-leaf-600 px-5 py-2 text-sm font-semibold text-white shadow transition hover:bg-leaf-700 disabled:opacity-50"
                 >
-                  {busy ? 'Saving...' : editing ? 'Save Changes' : 'Create Product'}
+                  {busy ? 'Saving...' : 'Save Changes'}
                 </button>
               </div>
             </form>

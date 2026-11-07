@@ -120,11 +120,16 @@ export default function Home() {
       {/* PROCESS */}
       <section className="mx-auto max-w-7xl px-6 py-24">
         <SectionTitle center eyebrow="From husk to harvest" title="Our natural process" />
-        <div className="relative mt-16 grid gap-8 md:grid-cols-4">
+        {/* Mobile: swipeable horizontal row · Desktop: 4-column grid */}
+        <div className="relative -mx-6 mt-12 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:mt-16 md:grid md:grid-cols-4 md:gap-8 md:overflow-visible md:px-0 md:pb-0">
           <div className="absolute left-0 right-0 top-7 hidden border-t-2 border-dashed border-leaf-300 md:block" aria-hidden="true" />
           {PROCESS.map((p, i) => (
-            <Reveal key={p.title} delay={i * 120} className="relative text-center">
-              <span className="relative mx-auto grid h-14 w-14 place-items-center rounded-full bg-leaf-700 font-head text-xl font-bold text-white shadow-lg ring-8 ring-shell-50">
+            <Reveal
+              key={p.title}
+              delay={i * 120}
+              className="relative w-[72%] shrink-0 snap-center rounded-2xl border border-shell-200 bg-white p-5 text-center shadow-sm sm:w-[44%] md:w-auto md:rounded-none md:border-0 md:bg-transparent md:p-0 md:shadow-none"
+            >
+              <span className="relative mx-auto grid h-14 w-14 place-items-center rounded-full bg-leaf-700 font-head text-xl font-bold text-white shadow-lg ring-8 ring-white md:ring-shell-50">
                 {i + 1}
               </span>
               <h3 className="mt-5 text-xl font-bold text-shell-900">{p.title}</h3>

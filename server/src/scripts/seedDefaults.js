@@ -1,61 +1,8 @@
 import mongoose from 'mongoose';
 import { config } from '../config.js';
 import { Product, Blog, Faq } from '../models.js';
+import { CATALOGUE as DEFAULT_PRODUCTS } from '../data/products.js';
 
-const DEFAULT_PRODUCTS = [
-  {
-    name: 'Cocopeat 5kg Block',
-    slug: 'cocopeat-5kg-block',
-    category: 'Compressed Coir',
-    short: 'Premium compressed, triple-washed, low-EC cocopeat block expanding to ~75 litres of airy substrate.',
-    image: '/images/block.jpg',
-    specs: {
-      'Weight': '5 kg (+/- 200g)',
-      'Expansion': '70 – 75 Litres',
-      'Electrical Conductivity (EC)': '< 0.5 mS/cm (Washed & Desalinated)',
-      'pH Range': '5.5 – 6.5',
-      'Moisture Content': '< 18%',
-      'Sieve Mesh': 'Fine sieved (unwanted fibres & baby dust removed)',
-      'Packing': '220 blocks / pallet, ~24 MT per 40ft HC container',
-    },
-    order: 1,
-    isActive: true,
-  },
-  {
-    name: 'Hydroponic Coir Grow Bags',
-    slug: 'hydroponic-coir-grow-bags',
-    category: 'Hydroponics',
-    short: 'Pre-cut UV-stabilised grow slabs engineered with coco peat & chips matrix for tomatoes, cucumbers and berries.',
-    image: '/images/growbags.jpg',
-    specs: {
-      'Standard Size': '100 × 15 × 10 cm / 100 × 20 × 10 cm',
-      'Blend Ratio': '70% Cocopeat + 30% Crushed Husk Chips (Customisable)',
-      'Electrical Conductivity (EC)': '< 0.6 mS/cm',
-      'pH Range': '5.5 – 6.5',
-      'Outer Sleeve': 'White/Black Co-extruded 3-year UV stabilised bag',
-      'Pre-drilled Holes': 'Drainage slits and plant hole cutouts pre-punched on order',
-    },
-    order: 2,
-    isActive: true,
-  },
-  {
-    name: 'Coco Husk Chips & Briquettes',
-    slug: 'coco-husk-chips-briquettes',
-    category: 'Husk Chips',
-    short: 'Evenly cut coconut husk cubes providing superior drainage, aeration and orchid potting media structure.',
-    image: '/images/chips.jpg',
-    specs: {
-      'Chip Grade': 'Medium (8–14 mm) / Large (12–20 mm)',
-      'Expansion Volume': '5× dry compacted volume',
-      'Electrical Conductivity (EC)': '< 0.5 mS/cm',
-      'pH Range': '5.5 – 6.5',
-      'Packing': '5 kg blocks, 10 kg briquettes, or loose polybags',
-      'Ideal Use': 'Orchids, Anthuriums, Hydroponic root zones & potting mix blends',
-    },
-    order: 3,
-    isActive: true,
-  },
-];
 
 const DEFAULT_BLOGS = [
   {

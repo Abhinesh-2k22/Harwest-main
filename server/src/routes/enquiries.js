@@ -7,7 +7,9 @@ const router = Router();
 // PUBLIC: Submit customer enquiry
 router.post('/', async (req, res) => {
   try {
-    const { name, email, phone, product, volume, message } = req.body || {};
+    const { name, email, phone, product, volume, message, company, country, state } = req.body || {};
+    const enquiryType = req.body?.enquiryType === 'domestic' ? 'domestic' : 'international';
+    const clip = (v, n = 200) => (v || '').toString().trim().slice(0, n);
 
     if (!name || typeof name !== 'string' || !name.trim()) {
       return res.status(400).json({ error: 'Please enter your name.' });
@@ -18,16 +20,26 @@ router.post('/', async (req, res) => {
     if (!message || typeof message !== 'string' || !message.trim()) {
       return res.status(400).json({ error: 'Please enter a message or specifications.' });
     }
+    if (enquiryType === 'international' && !clip(country)) {
+      return res.status(400).json({ error: 'Please enter your country.' });
+    }
+    if (enquiryType === 'domestic' && !clip(state)) {
+      return res.status(400).json({ error: 'Please enter your state.' });
+    }
 
     const clientIp = req.headers['x-forwarded-for'] || req.socket?.remoteAddress || '';
 
     const enquiry = await Enquiry.create({
-      name: name.trim(),
-      email: email.trim().toLowerCase(),
-      phone: (phone || '').toString().trim(),
-      product: (product || '').toString().trim(),
-      volume: (volume || '').toString().trim(),
-      message: message.trim(),
+      enquiryType,
+      name: clip(name),
+      company: clip(company),
+      country: enquiryType === 'international' ? clip(country) : '',
+      state: enquiryType === 'domestic' ? clip(state) : '',
+      email: email.trim().toLowerCase().slice(0, 254),
+      phone: clip(phone, 40),
+      product: clip(product),
+      volume: clip(volume),
+      message: message.trim().slice(0, 5000),
       status: 'new',
       clientIp: String(clientIp).split(',')[0].trim(),
     });

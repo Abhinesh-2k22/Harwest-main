@@ -8,6 +8,7 @@
     "start": "node src/index.js",
     "seed:admin": "node src/scripts/seedAdmin.js",
     "seed:defaults": "node src/scripts/seedDefaults.js",
+    "seed:products": "node src/scripts/seedProducts.js",
     "sync:cloudinary": "node src/scripts/syncCloudinary.js"
   },
   "dependencies": {

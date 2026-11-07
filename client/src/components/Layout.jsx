@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
-import { Menu, X, Leaf, Phone, Mail, MapPin, MessageCircle, Linkedin, Instagram, Sparkles } from 'lucide-react';
+import { Menu, X, Leaf, Phone, Mail, MapPin, MessageCircle, Linkedin, Instagram, Facebook, Sparkles } from 'lucide-react';
 import { NAV, SITE } from '../config/siteContent';
 import { useAsset } from '../context/MediaContext';
 
@@ -57,21 +57,21 @@ function Navbar() {
       {/* Top Utility Bar (visible at start of scroll) */}
       <div
         className={`transition-all duration-300 overflow-hidden ${
-          scrolled ? 'max-h-0 opacity-0' : 'max-h-12 border-b border-white/10 bg-leaf-950/90 text-white/80'
+          scrolled ? 'max-h-0 opacity-0' : 'max-h-24 border-b border-white/10 bg-leaf-950/90 text-white/80'
         }`}
       >
-        <div className="mx-auto flex h-10 max-w-7xl items-center justify-between px-6 text-xs font-medium">
-          <div className="flex items-center gap-6">
-            <a href={`tel:${SITE.phone}`} className="flex items-center gap-1.5 transition hover:text-white">
-              <Phone size={13} className="text-leaf-300" />
+        <div className="mx-auto flex min-h-10 max-w-7xl flex-wrap items-center justify-between gap-x-4 gap-y-1 px-4 py-1.5 text-[11px] font-medium sm:px-6 sm:text-xs">
+          <div className="flex flex-wrap items-center gap-x-4 gap-y-1 sm:gap-6">
+            <a href={`tel:${SITE.phone}`} className="flex items-center gap-1.5 whitespace-nowrap transition hover:text-white">
+              <Phone size={13} className="shrink-0 text-leaf-300" />
               <span>{SITE.phone}</span>
             </a>
-            <a href={`mailto:${SITE.email}`} className="hidden sm:flex items-center gap-1.5 transition hover:text-white">
-              <Mail size={13} className="text-leaf-300" />
+            <a href={`mailto:${SITE.email}`} className="flex items-center gap-1.5 whitespace-nowrap transition hover:text-white">
+              <Mail size={13} className="shrink-0 text-leaf-300" />
               <span>{SITE.email}</span>
             </a>
           </div>
-          <div className="flex items-center gap-5">
+          <div className="hidden items-center gap-5 sm:flex">
             <span className="hidden lg:inline text-[11px] text-white/60">Pollachi, India · Worldwide Export</span>
             <div className="flex items-center gap-3">
               <a href={SITE.socials.find(s => s.label === 'LinkedIn')?.href || "https://linkedin.com"} target="_blank" rel="noopener noreferrer" aria-label="LinkedIn" className="text-white/75 transition hover:text-white">
@@ -79,6 +79,9 @@ function Navbar() {
               </a>
               <a href={SITE.socials.find(s => s.label === 'Instagram')?.href || "https://instagram.com"} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="text-white/75 transition hover:text-white">
                 <Instagram size={14} />
+              </a>
+              <a href={SITE.socials.find(s => s.label === 'Facebook')?.href || "https://facebook.com"} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="text-white/75 transition hover:text-white">
+                <Facebook size={14} />
               </a>
               <a href={`https://wa.me/${SITE.whatsapp}`} target="_blank" rel="noopener noreferrer" aria-label="WhatsApp" className="text-white/75 transition hover:text-leaf-300">
                 <MessageCircle size={14} />
@@ -194,9 +197,19 @@ function Footer() {
   };
 
   return (
-    <footer className="relative mt-24 bg-leaf-950 text-shell-100 leaf-pattern overflow-hidden">
+    <footer className="relative isolate mt-24 overflow-hidden bg-gradient-to-b from-leaf-800 via-leaf-900 to-leaf-950 text-shell-100">
+      {/* Botanical line-art pattern (leaves, berries, tomatoes…) tinted into the green theme */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10 bg-[url('/images/footer-pattern.png')] bg-[length:760px_auto] bg-center opacity-[0.22] invert mix-blend-screen"
+      />
+      {/* Soft green vignette so text stays readable over the pattern */}
+      <div
+        aria-hidden="true"
+        className="pointer-events-none absolute inset-0 -z-10 bg-[radial-gradient(ellipse_at_center,transparent_0%,rgba(10,21,12,0.55)_100%)]"
+      />
       {/* Top Banner: Crafted for HAPPY BLOOMS & HIGH YIELDS */}
-      <div className="border-b border-white/10 bg-leaf-900/60 backdrop-blur-sm">
+      <div className="border-b border-white/10 bg-leaf-950/30">
         <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-6 px-6 py-8">
           <div>
             <p className="font-head text-xs uppercase tracking-widest text-coconut-300 font-semibold">Crafted for</p>
@@ -250,6 +263,15 @@ function Footer() {
               <Instagram size={14} />
             </a>
             <a
+              href={SITE.socials.find(s => s.label === 'Facebook')?.href || "https://facebook.com"}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Facebook"
+              className="grid h-8 w-8 place-items-center rounded-full bg-white/10 text-white hover:bg-leaf-600 transition"
+            >
+              <Facebook size={14} />
+            </a>
+            <a
               href={`https://wa.me/${SITE.whatsapp}`}
               target="_blank"
               rel="noopener noreferrer"
@@ -261,15 +283,14 @@ function Footer() {
           </div>
         </div>
 
-        {/* Col 2: Quick Links with Plant Symbols */}
+        {/* Col 2: Quick Links */}
         <div>
           <h3 className="font-head text-base font-bold uppercase tracking-wider text-white">Quick Links</h3>
           <ul className="mt-4 space-y-2.5 text-sm text-shell-200/85">
             {NAV.map((n) => (
               <li key={n.to}>
-                <Link to={n.to} className="group inline-flex items-center gap-2 transition hover:text-white">
-                  <span className="text-leaf-400 group-hover:scale-125 transition-transform">🌱</span>
-                  <span className="group-hover:translate-x-1 transition-transform">{n.label}</span>
+                <Link to={n.to} className="inline-block transition hover:translate-x-1 hover:text-white">
+                  {n.label}
                 </Link>
               </li>
             ))}
