@@ -4,6 +4,7 @@ import { MediaProvider } from './context/MediaContext';
 import Layout from './components/Layout';
 import Home from './pages/Home';
 import Products from './pages/Products';
+import Infrastructure from './pages/Infrastructure';
 import About from './pages/About';
 import Blog from './pages/Blog';
 import BlogPost from './pages/BlogPost';
@@ -29,6 +30,7 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/about" element={<About />} />
             <Route path="/products" element={<Products />} />
+            <Route path="/infrastructure" element={<Infrastructure />} />
             <Route path="/blog" element={<Blog />} />
             <Route path="/blog/:slug" element={<BlogPost />} />
             <Route path="/contact" element={<Contact />} />

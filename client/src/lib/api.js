@@ -1,13 +1,40 @@
 /**
  * Tiny API wrapper. All backend URLs live here.
- * In development, Vite proxies /api to http://localhost:5000.
- * In production on Vercel, VITE_API_URL or same-domain proxy can be used.
+ * Supports both HTTP-only cookies AND Bearer token fallback so cross-domain
+ * deployments (e.g. Cloudflare Pages/Workers + Render) never fail with 401 Unauthorized.
  */
 const rawApiUrl = (import.meta.env.VITE_API_URL || '').replace(/\/+$/, '');
 const BASE = rawApiUrl ? (rawApiUrl.endsWith('/api') ? rawApiUrl : `${rawApiUrl}/api`) : '/api';
 
+const TOKEN_KEY = 'hw_admin_token';
+
+function getToken() {
+  try {
+    return localStorage.getItem(TOKEN_KEY) || '';
+  } catch {
+    return '';
+  }
+}
+
+function setToken(token) {
+  try {
+    if (token) localStorage.setItem(TOKEN_KEY, token);
+    else localStorage.removeItem(TOKEN_KEY);
+  } catch {}
+}
+
+function clearProductsCache() {
+  try {
+    localStorage.removeItem('hw_products_cache');
+  } catch {}
+}
+
 async function request(path, { method = 'GET', body, form } = {}) {
   const headers = { 'X-Requested-With': 'harwest-admin' };
+  const token = getToken();
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
   let payload;
   if (form) payload = form;
   else if (body) {
@@ -25,11 +52,24 @@ export const api = {
   health: () => request('/health'),
 
   // --- Auth ---
-  login: (email, password) => request('/auth/login', { method: 'POST', body: { email, password } }),
-  logout: () => request('/auth/logout', { method: 'POST' }),
+  login: async (email, password) => {
+    const data = await request('/auth/login', { method: 'POST', body: { email, password } });
+    if (data?.token) setToken(data.token);
+    return data;
+  },
+  logout: async () => {
+    try {
+      return await request('/auth/logout', { method: 'POST' });
+    } finally {
+      setToken('');
+    }
+  },
   me: () => request('/auth/me'),
-  changePassword: (currentPassword, newPassword) =>
-    request('/auth/change-password', { method: 'POST', body: { currentPassword, newPassword } }),
+  changePassword: async (currentPassword, newPassword) => {
+    const data = await request('/auth/change-password', { method: 'POST', body: { currentPassword, newPassword } });
+    if (data?.token) setToken(data.token);
+    return data;
+  },
 
   // --- Media & Branding Overrides ---
   getMedia: () => request('/media'),
@@ -43,6 +83,10 @@ export const api = {
       xhr.open('POST', BASE + '/media/upload');
       xhr.withCredentials = true;
       xhr.setRequestHeader('X-Requested-With', 'harwest-admin');
+      const token = getToken();
+      if (token) {
+        xhr.setRequestHeader('Authorization', `Bearer ${token}`);
+      }
       xhr.upload.onprogress = (e) => {
         if (e.lengthComputable && onProgress) onProgress(Math.round((e.loaded / e.total) * 100));
       };
@@ -65,7 +109,18 @@ export const api = {
   // --- Products (fixed catalogue: public fetch + admin detail updates only) ---
   getProducts: () => request('/products'),
   getAllProducts: () => request('/products/all'),
-  updateProduct: (id, data) => request(`/products/${id}`, { method: 'PUT', body: data }),
+  updateProduct: async (id, data) => {
+    const res = await request(`/products/${id}`, { method: 'PUT', body: data });
+    clearProductsCache();
+    return res;
+  },
+
+  // --- Infrastructure (Pollachi Facilities Gallery: Admin CRUD + Public Fetch) ---
+  getInfrastructure: () => request('/infrastructure'),
+  getAllInfrastructure: () => request('/infrastructure/all'),
+  createInfrastructure: (data) => request('/infrastructure', { method: 'POST', body: data }),
+  updateInfrastructure: (id, data) => request(`/infrastructure/${id}`, { method: 'PUT', body: data }),
+  deleteInfrastructure: (id) => request(`/infrastructure/${id}`, { method: 'DELETE' }),
 
   // --- Blog Posts (Admin CRUD + Public Fetch) ---
   getBlogs: (category, search) => {

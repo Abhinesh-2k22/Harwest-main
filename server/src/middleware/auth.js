@@ -17,10 +17,16 @@ export const cookieOptions = () => ({
   maxAge: 1000 * 60 * 60 * 8,
 });
 
-/** Requires a valid admin session cookie. */
+/** Requires a valid admin session cookie OR Authorization Bearer token. */
 export async function requireAdmin(req, res, next) {
   try {
-    const token = req.cookies?.[config.cookieName];
+    let token = req.cookies?.[config.cookieName];
+    if (!token) {
+      const authHeader = req.get('authorization') || '';
+      if (authHeader.toLowerCase().startsWith('bearer ')) {
+        token = authHeader.slice(7).trim();
+      }
+    }
     if (!token) return res.status(401).json({ error: 'Unauthorized' });
     const payload = jwt.verify(token, config.jwtSecret, { algorithms: ['HS256'] });
     const admin = await Admin.findById(payload.sub);
@@ -35,22 +41,11 @@ export async function requireAdmin(req, res, next) {
 }
 
 /**
- * CSRF defence for state-changing requests (on top of SameSite=Strict cookie):
- * requires a matching Origin and a custom header browsers can't send cross-site.
+ * CSRF defence for state-changing requests:
+ * requires a custom header browsers can't send without CORS preflight.
  */
 export function csrfGuard(req, res, next) {
   if (['GET', 'HEAD', 'OPTIONS'].includes(req.method)) return next();
-  const origin = req.get('origin');
-  if (origin && config.isProd) {
-    const cleanOrigin = origin.replace(/\/+$/, '');
-    const allowed = (config.clientOrigin || '')
-      .split(',')
-      .map((o) => o.trim().replace(/\/+$/, ''))
-      .filter(Boolean);
-    if (!allowed.includes(cleanOrigin)) {
-      return res.status(403).json({ error: 'Forbidden: Origin mismatch' });
-    }
-  }
   if (req.get('x-requested-with') !== 'harwest-admin') {
     return res.status(403).json({ error: 'Forbidden' });
   }

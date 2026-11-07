@@ -2,13 +2,54 @@ import { Router } from 'express';
 import { Product } from '../models.js';
 import { requireAdmin, csrfGuard } from '../middleware/auth.js';
 import { scheduleDeletion, cancelDeletion } from '../lib/cleanup.js';
-import { PRODUCT_CATEGORIES } from '../data/products.js';
+import { CATALOGUE, PRODUCT_CATEGORIES } from '../data/products.js';
 
 const router = Router();
+
+async function ensureProductsSynced() {
+  const count = await Product.countDocuments();
+  if (count === 0) {
+    await Product.insertMany(CATALOGUE);
+    return;
+  }
+  const existing = await Product.find().sort({ order: 1, createdAt: 1 });
+  for (let i = 0; i < existing.length; i++) {
+    const doc = existing[i];
+    const template =
+      CATALOGUE.find((c) => c.slug === doc.slug) ||
+      CATALOGUE.find((c) => c.order === doc.order) ||
+      CATALOGUE[i];
+    if (!template) continue;
+
+    let changed = false;
+    // Ensure Product 1 no longer has 650g block and has updated name/variants
+    if (template.slug === 'coir-pith-blocks') {
+      if (doc.name.includes('650')) {
+        doc.name = template.name;
+        changed = true;
+      }
+      if (Array.isArray(doc.variants) && doc.variants.some((v) => /650/i.test(v))) {
+        doc.variants = template.variants;
+        doc.variantDetails = template.variantDetails;
+        doc.specs = template.specs;
+        doc.short = template.short;
+        changed = true;
+      }
+    }
+    if (!Array.isArray(doc.variantDetails) || doc.variantDetails.length === 0) {
+      doc.variantDetails = template.variantDetails;
+      changed = true;
+    }
+    if (changed) {
+      await doc.save();
+    }
+  }
+}
 
 // PUBLIC: List all active products
 router.get('/', async (_req, res) => {
   try {
+    await ensureProductsSynced();
     const products = await Product.find({ isActive: true }).sort({ order: 1, createdAt: 1 }).lean();
     res.set('Cache-Control', 'no-store');
     res.json(products);
@@ -24,6 +65,7 @@ router.get('/categories', (_req, res) => res.json(PRODUCT_CATEGORIES));
 // ADMIN: List all products (including inactive)
 router.get('/all', requireAdmin, async (_req, res) => {
   try {
+    await ensureProductsSynced();
     const products = await Product.find().sort({ order: 1, createdAt: 1 }).lean();
     res.set('Cache-Control', 'no-store');
     res.json(products);
@@ -46,6 +88,23 @@ function optimizeCloudinaryUrl(url) {
 const cleanList = (arr, max, maxLen) =>
   [...new Set((Array.isArray(arr) ? arr : []).map((v) => String(v || '').trim().slice(0, maxLen)).filter(Boolean))].slice(0, max);
 
+const cleanVariantDetails = (arr) => {
+  if (!Array.isArray(arr)) return [];
+  return arr
+    .map((v) => {
+      if (!v || typeof v !== 'object') return null;
+      const name = String(v.name || '').trim().slice(0, 120);
+      if (!name) return null;
+      const badge = String(v.badge || '').trim().slice(0, 100);
+      const short = String(v.short || '').trim().slice(0, 1200);
+      const image = v.image ? optimizeCloudinaryUrl(String(v.image).trim()) : '';
+      const specs = v.specs && typeof v.specs === 'object' ? v.specs : {};
+      return { name, badge, short, image, specs };
+    })
+    .filter(Boolean)
+    .slice(0, 20);
+};
+
 // NOTE: Creating and deleting products is intentionally NOT supported.
 // The catalogue is fixed (see server/src/data/products.js); admins only update details.
 
@@ -60,7 +119,7 @@ router.put('/:id', requireAdmin, csrfGuard, async (req, res) => {
     const previous = await Product.findById(id).lean();
     if (!previous) return res.status(404).json({ error: 'Product not found' });
 
-    const { name, short, image, specs, categories, variants, isActive } = req.body;
+    const { name, short, image, specs, categories, variants, variantDetails, isActive } = req.body;
     const update = {};
     if (name !== undefined) {
       const n = String(name || '').trim();
@@ -77,7 +136,13 @@ router.put('/:id', requireAdmin, csrfGuard, async (req, res) => {
     if (categories !== undefined) {
       update.categories = cleanList(categories, 12, 40).filter((c) => PRODUCT_CATEGORIES.includes(c));
     }
-    if (variants !== undefined) update.variants = cleanList(variants, 20, 120);
+    if (variantDetails !== undefined) {
+      const cleanedDetails = cleanVariantDetails(variantDetails);
+      update.variantDetails = cleanedDetails;
+      update.variants = cleanedDetails.map((d) => d.name);
+    } else if (variants !== undefined) {
+      update.variants = cleanList(variants, 20, 120);
+    }
     if (isActive !== undefined) update.isActive = Boolean(isActive);
 
     const product = await Product.findByIdAndUpdate(id, update, { new: true });
@@ -88,6 +153,15 @@ router.put('/:id', requireAdmin, csrfGuard, async (req, res) => {
         await scheduleDeletion(previous?.image, product.image);
       } catch (cleanErr) {
         console.warn('[cleanup] non-critical cleanup warning:', cleanErr.message);
+      }
+    }
+    if (Array.isArray(update.variantDetails)) {
+      for (const vd of update.variantDetails) {
+        if (vd.image) {
+          try {
+            await cancelDeletion(vd.image);
+          } catch {}
+        }
       }
     }
     res.json(product);

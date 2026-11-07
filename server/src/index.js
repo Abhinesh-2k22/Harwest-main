@@ -13,6 +13,7 @@ import authRoutes from './routes/auth.js';
 import mediaRoutes from './routes/media.js';
 import enquiryRoutes from './routes/enquiries.js';
 import productRoutes from './routes/products.js';
+import infrastructureRoutes from './routes/infrastructure.js';
 import blogRoutes from './routes/blogs.js';
 import faqRoutes from './routes/faqs.js';
 import { UPLOAD_DIR } from './middleware/upload.js';
@@ -30,20 +31,27 @@ const allowedOrigins = (config.clientOrigin || 'http://localhost:5173')
   .map((o) => o.trim().replace(/\/+$/, ''))
   .filter(Boolean);
 
+const isAllowedOrigin = (origin) => {
+  if (!origin) return true;
+  const cleanOrigin = origin.replace(/\/+$/, '');
+  if (!config.isProd || allowedOrigins.includes(cleanOrigin)) return true;
+  if (/^https?:\/\/([a-z0-9-]+\.)*(harwestcoirs\.com|pages\.dev|workers\.dev|localhost)(:\d+)?$/i.test(cleanOrigin)) {
+    return true;
+  }
+  return false;
+};
+
 app.use(
   cors({
     origin: (origin, callback) => {
-      if (!origin) return callback(null, true);
-      const cleanOrigin = origin.replace(/\/+$/, '');
-      if (!config.isProd || allowedOrigins.includes(cleanOrigin)) {
-        return callback(null, true);
-      }
+      if (isAllowedOrigin(origin)) return callback(null, true);
       return callback(new Error(`Blocked by CORS: ${origin}`));
     },
     credentials: true,
+    allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
   })
 );
-app.use(express.json({ limit: '10kb' }));
+app.use(express.json({ limit: '100kb' }));
 app.use(cookieParser());
 app.use(mongoSanitize());
 app.use(rateLimit({ windowMs: 60 * 1000, limit: 300, standardHeaders: true, legacyHeaders: false }));
@@ -75,6 +83,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/media', mediaRoutes);
 app.use('/api/enquiries', enquiryRoutes);
 app.use('/api/products', productRoutes);
+app.use('/api/infrastructure', infrastructureRoutes);
 app.use('/api/blogs', blogRoutes);
 app.use('/api/faqs', faqRoutes);
 

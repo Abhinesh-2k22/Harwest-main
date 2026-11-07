@@ -19,6 +19,17 @@ const mediaSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+const variantDetailSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true, trim: true },
+    badge: { type: String, default: '', trim: true },
+    short: { type: String, default: '' },
+    image: { type: String, default: '' },
+    specs: { type: Map, of: String, default: {} },
+  },
+  { _id: false }
+);
+
 const productSchema = new mongoose.Schema(
   {
     name: { type: String, required: true, trim: true },
@@ -26,9 +37,23 @@ const productSchema = new mongoose.Schema(
     category: { type: String, default: '' }, // legacy single category (unused)
     categories: { type: [String], default: [] },
     variants: { type: [String], default: [] }, // sub-types, e.g. "5 kg Low EC Coir Pith Block"
+    variantDetails: { type: [variantDetailSchema], default: [] },
     short: { type: String, required: true },
     image: { type: String, default: '' },
     specs: { type: Map, of: String, default: {} },
+    order: { type: Number, default: 0 },
+    isActive: { type: Boolean, default: true },
+  },
+  { timestamps: true }
+);
+
+const infrastructureSchema = new mongoose.Schema(
+  {
+    title: { type: String, required: true, trim: true },
+    category: { type: String, default: 'Processing Area', trim: true },
+    description: { type: String, default: '', trim: true },
+    mediaUrl: { type: String, required: true, trim: true },
+    mediaType: { type: String, enum: ['image', 'video'], default: 'image' },
     order: { type: Number, default: 0 },
     isActive: { type: Boolean, default: true },
   },
@@ -94,6 +119,7 @@ const enquirySchema = new mongoose.Schema(
 export const Admin = mongoose.model('Admin', adminSchema);
 export const Media = mongoose.model('Media', mediaSchema);
 export const Product = mongoose.model('Product', productSchema);
+export const Infrastructure = mongoose.model('Infrastructure', infrastructureSchema);
 export const Blog = mongoose.model('Blog', blogSchema);
 export const Faq = mongoose.model('Faq', faqSchema);
 export const Enquiry = mongoose.model('Enquiry', enquirySchema);

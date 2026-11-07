@@ -26,11 +26,19 @@ import {
   Eye,
   EyeOff,
   AlertTriangle,
+  Building2,
+  Film,
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { ASSET_DEFAULTS, ASSET_GROUPS } from '../config/assets';
 import { useMedia } from '../context/MediaContext';
-import { FAQ as FALLBACK_FAQS, DEFAULT_BLOGS, PRODUCT_CATEGORIES } from '../config/siteContent';
+import {
+  FAQ as FALLBACK_FAQS,
+  DEFAULT_BLOGS,
+  PRODUCT_CATEGORIES,
+  INFRASTRUCTURE_CATEGORIES,
+  DEFAULT_INFRASTRUCTURE,
+} from '../config/siteContent';
 import GrowLoader from '../components/GrowLoader';
 
 const inputCls =
@@ -303,6 +311,7 @@ function ProductsTab() {
   const [editing, setEditing] = useState(null);
   const [busy, setBusy] = useState(false);
   const [uploadPct, setUploadPct] = useState(null);
+  const [variantUploadIdx, setVariantUploadIdx] = useState(null);
   const [loadError, setLoadError] = useState('');
   const fileRef = useRef(null);
 
@@ -311,8 +320,8 @@ function ProductsTab() {
     short: '',
     image: '',
     specsText: '',
-    variantsText: '',
     categories: [],
+    variantItems: [],
     isActive: true,
   };
   const [form, setForm] = useState(EMPTY_FORM);
@@ -340,7 +349,6 @@ function ProductsTab() {
     setLoading(true);
     setLoadError('');
     try {
-      // Admin list includes hidden products, otherwise they could never be re-published.
       const data = await api.getAllProducts();
       setProducts(Array.isArray(data) ? data : []);
     } catch (e) {
@@ -356,13 +364,29 @@ function ProductsTab() {
 
   const openEdit = (p) => {
     setEditing(p);
+    const existingDetails = Array.isArray(p.variantDetails) && p.variantDetails.length > 0
+      ? p.variantDetails
+      : (p.variants || []).map((vName) => ({
+          name: vName,
+          badge: '',
+          short: p.short || '',
+          image: p.image || '',
+          specs: p.specs || {},
+        }));
+
     setForm({
       name: p.name || '',
       short: p.short || '',
       image: p.image || '',
       specsText: specsToText(p.specs),
-      variantsText: (p.variants || []).join('\n'),
       categories: Array.isArray(p.categories) ? p.categories : [],
+      variantItems: existingDetails.map((vd) => ({
+        name: vd.name || '',
+        badge: vd.badge || '',
+        short: vd.short || '',
+        image: vd.image || '',
+        specsText: specsToText(vd.specs),
+      })),
       isActive: p.isActive !== false,
     });
     setModalOpen(true);
@@ -373,6 +397,53 @@ function ProductsTab() {
       ...prev,
       categories: prev.categories.includes(c) ? prev.categories.filter((x) => x !== c) : [...prev.categories, c],
     }));
+
+  const updateVariantField = (idx, field, value) => {
+    setForm((prev) => {
+      const next = [...prev.variantItems];
+      next[idx] = { ...next[idx], [field]: value };
+      return { ...prev, variantItems: next };
+    });
+  };
+
+  const addVariantItem = () => {
+    setForm((prev) => ({
+      ...prev,
+      variantItems: [
+        ...prev.variantItems,
+        {
+          name: '',
+          badge: '',
+          short: prev.short || '',
+          image: prev.image || '',
+          specsText: prev.specsText || '',
+        },
+      ],
+    }));
+  };
+
+  const removeVariantItem = (idx) => {
+    setForm((prev) => ({
+      ...prev,
+      variantItems: prev.variantItems.filter((_, i) => i !== idx),
+    }));
+  };
+
+  const handleVariantUpload = async (idx, e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setVariantUploadIdx(idx);
+    setUploadPct(0);
+    try {
+      const { url } = await api.upload(file, setUploadPct);
+      updateVariantField(idx, 'image', url);
+    } catch (er) {
+      alert('Variant photo upload failed: ' + er.message);
+    }
+    setUploadPct(null);
+    setVariantUploadIdx(null);
+    e.target.value = '';
+  };
 
   const toggleActive = async (p) => {
     try {
@@ -386,6 +457,7 @@ function ProductsTab() {
   const handleUpload = async (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    setVariantUploadIdx(null);
     setUploadPct(0);
     try {
       const { url } = await api.upload(file, setUploadPct);
@@ -402,11 +474,22 @@ function ProductsTab() {
     if (!editing?._id) return;
     setBusy(true);
     try {
-      const { specsText, variantsText, ...rest } = form;
+      const { specsText, variantItems, ...rest } = form;
+      const cleanVariantDetails = (variantItems || [])
+        .map((v) => ({
+          name: String(v.name || '').trim(),
+          badge: String(v.badge || '').trim(),
+          short: String(v.short || '').trim(),
+          image: String(v.image || '').trim(),
+          specs: textToSpecs(v.specsText),
+        }))
+        .filter((v) => v.name);
+
       const payload = {
         ...rest,
         specs: textToSpecs(specsText),
-        variants: variantsText.split('\n').map((v) => v.trim()).filter(Boolean),
+        variants: cleanVariantDetails.map((v) => v.name),
+        variantDetails: cleanVariantDetails,
       };
       await api.updateProduct(editing._id, payload);
       setModalOpen(false);
@@ -423,7 +506,7 @@ function ProductsTab() {
         <div>
           <h2 className="text-2xl font-bold text-shell-900">Products Catalog</h2>
           <p className="text-sm text-shell-600">
-            Update the details, photo, categories and types of your products. The product list itself is fixed.
+            Update the details, main photo, categories, and individual type photos &amp; specifications for each product.
           </p>
         </div>
       </div>
@@ -458,6 +541,9 @@ function ProductsTab() {
                 <div className="mt-4 flex items-center justify-between">
                   <span className="text-xs font-semibold text-leaf-800">
                     Product #{p.order ?? idx + 1}
+                  </span>
+                  <span className="text-[11px] font-semibold text-shell-500">
+                    {(p.variantDetails || p.variants || []).length} clickable types
                   </span>
                 </div>
                 <h3 className="mt-2 text-lg font-bold text-shell-900">{p.name}</h3>
@@ -495,9 +581,9 @@ function ProductsTab() {
                   <button
                     onClick={() => openEdit(p)}
                     className="flex items-center gap-1.5 rounded-lg border border-shell-200 px-3 py-2 text-xs font-bold text-shell-700 hover:bg-shell-50"
-                    title="Edit product details"
+                    title="Edit product & variant details"
                   >
-                    <Edit3 size={14} /> Edit details
+                    <Edit3 size={14} /> Edit details &amp; types
                   </button>
                 </div>
               </div>
@@ -509,7 +595,7 @@ function ProductsTab() {
       {/* Modal Dialog */}
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
-          <div className="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white p-7 shadow-2xl">
+          <div className="w-full max-w-3xl max-h-[92vh] overflow-y-auto rounded-3xl bg-white p-7 shadow-2xl">
             <div className="flex items-center justify-between border-b border-shell-100 pb-4">
               <h3 className="font-head text-xl font-bold text-shell-900">
                 {editing ? `Edit: ${editing.name}` : 'Edit Product'}
@@ -522,7 +608,7 @@ function ProductsTab() {
               </button>
             </div>
 
-            <form onSubmit={submit} className="mt-5 space-y-4">
+            <form onSubmit={submit} className="mt-5 space-y-5">
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-shell-700">
                   Product Name *
@@ -530,7 +616,7 @@ function ProductsTab() {
                 <input
                   required
                   className={inputCls}
-                  placeholder="e.g. Cocopeat 5kg Block"
+                  placeholder="e.g. Coir Pith 5kg Block"
                   value={form.name}
                   onChange={(e) => setForm({ ...form, name: e.target.value })}
                 />
@@ -564,23 +650,7 @@ function ProductsTab() {
 
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-shell-700">
-                  Product Types / Sub-products (one per line)
-                </label>
-                <textarea
-                  rows={4}
-                  className={inputCls}
-                  placeholder={'5 kg Low EC Coir Pith Block\n5 kg High EC Coir Pith Block\n650 grams Block'}
-                  value={form.variantsText}
-                  onChange={(e) => setForm({ ...form, variantsText: e.target.value })}
-                />
-                <p className="mt-1 text-[11px] text-shell-500">
-                  These appear on the Products page and in the Enquiry form's product dropdown.
-                </p>
-              </div>
-
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-shell-700">
-                  Short Description *
+                  Main Short Description *
                 </label>
                 <textarea
                   required
@@ -594,7 +664,7 @@ function ProductsTab() {
 
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-shell-700">
-                  Product Image
+                  Main Product Image
                 </label>
                 <div className="flex gap-2">
                   <input
@@ -619,32 +689,163 @@ function ProductsTab() {
                     <Upload size={14} /> Upload
                   </button>
                 </div>
-                {uploadPct !== null && (
+                {uploadPct !== null && variantUploadIdx === null && (
                   <div className="mt-3 flex justify-center">
                     <GrowLoader overlay={false} progress={uploadPct} label="Uploading image" />
                   </div>
                 )}
-                {form.image && uploadPct === null && (
+                {form.image && (uploadPct === null || variantUploadIdx !== null) && (
                   <div className="mt-2 h-24 w-36 overflow-hidden rounded-xl border border-shell-200">
                     <img src={form.image} alt="" className="h-full w-full object-cover" />
                   </div>
                 )}
-                <p className="mt-1 text-[11px] text-shell-500">
-                  This is the only place to change a product photo. It is used on the Home page and the Products page.
-                </p>
               </div>
 
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-shell-700">
-                  Specifications (one per line, "Label: value")
+                  Default Specifications (one per line, "Label: value")
                 </label>
                 <textarea
-                  rows={6}
+                  rows={5}
                   className={`${inputCls} font-mono text-xs`}
-                  placeholder={'Weight: 5 kg\npH Range: 5.5 – 6.5\nPacking: 220 blocks / pallet'}
+                  placeholder={'Block: 30 × 30 × 10 cm, 5 kg\npH: 5.5 – 6.5'}
                   value={form.specsText}
                   onChange={(e) => setForm({ ...form, specsText: e.target.value })}
                 />
+              </div>
+
+              {/* CLICKABLE PRODUCT TYPES / VARIANTS EDITOR */}
+              <div className="rounded-2xl border border-leaf-200 bg-leaf-50/40 p-5 space-y-4">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div>
+                    <h4 className="font-head text-base font-bold text-shell-900">
+                      Clickable Product Types (Image, Description &amp; Specs per Type)
+                    </h4>
+                    <p className="text-xs text-shell-600">
+                      When a visitor clicks a type on the Products page, its photo, description, and specification table switch automatically.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={addVariantItem}
+                    className="flex items-center gap-1.5 rounded-xl bg-leaf-700 px-3 py-1.5 text-xs font-bold text-white shadow-xs hover:bg-leaf-800"
+                  >
+                    <Plus size={14} /> Add Type
+                  </button>
+                </div>
+
+                {form.variantItems.length === 0 ? (
+                  <p className="text-xs text-shell-500 italic">
+                    No product types added yet. Click &ldquo;Add Type&rdquo; above to add one.
+                  </p>
+                ) : (
+                  <div className="space-y-4">
+                    {form.variantItems.map((vItem, idx) => (
+                      <div
+                        key={idx}
+                        className="rounded-2xl border border-shell-200 bg-white p-4 shadow-xs space-y-3"
+                      >
+                        <div className="flex items-center justify-between border-b border-shell-100 pb-2">
+                          <span className="text-xs font-bold uppercase tracking-wider text-leaf-800">
+                            Type #{idx + 1}: {vItem.name || 'Untitled Type'}
+                          </span>
+                          <button
+                            type="button"
+                            onClick={() => removeVariantItem(idx)}
+                            className="flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-red-600 hover:bg-red-50"
+                          >
+                            <Trash2 size={13} /> Remove
+                          </button>
+                        </div>
+
+                        <div className="grid gap-3 sm:grid-cols-2">
+                          <div>
+                            <label className="block text-[11px] font-bold uppercase tracking-wider text-shell-600">
+                              Type Name *
+                            </label>
+                            <input
+                              required
+                              className={inputCls}
+                              placeholder="e.g. 5 kg Low EC Coir Pith Block"
+                              value={vItem.name}
+                              onChange={(e) => updateVariantField(idx, 'name', e.target.value)}
+                            />
+                          </div>
+                          <div>
+                            <label className="block text-[11px] font-bold uppercase tracking-wider text-shell-600">
+                              Highlight Badge (Optional)
+                            </label>
+                            <input
+                              className={inputCls}
+                              placeholder="e.g. Low EC — Washed"
+                              value={vItem.badge}
+                              onChange={(e) => updateVariantField(idx, 'badge', e.target.value)}
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-bold uppercase tracking-wider text-shell-600">
+                            Type Photo (shown when clicked)
+                          </label>
+                          <div className="flex gap-2">
+                            <input
+                              className={inputCls}
+                              placeholder="Image URL or click Upload"
+                              value={vItem.image}
+                              onChange={(e) => updateVariantField(idx, 'image', e.target.value)}
+                            />
+                            <label className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-xl border border-shell-300 bg-shell-100 px-3.5 py-2 text-xs font-bold text-shell-800 hover:bg-shell-200">
+                              <Upload size={14} /> Upload
+                              <input
+                                type="file"
+                                hidden
+                                accept="image/jpeg,image/png,image/webp"
+                                onChange={(e) => handleVariantUpload(idx, e)}
+                              />
+                            </label>
+                          </div>
+                          {uploadPct !== null && variantUploadIdx === idx && (
+                            <div className="mt-2 flex justify-center">
+                              <GrowLoader overlay={false} progress={uploadPct} label="Uploading type photo" />
+                            </div>
+                          )}
+                          {vItem.image && (
+                            <div className="mt-2 h-20 w-28 overflow-hidden rounded-xl border border-shell-200">
+                              <img src={vItem.image} alt="" className="h-full w-full object-cover" />
+                            </div>
+                          )}
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-bold uppercase tracking-wider text-shell-600">
+                            Type Description
+                          </label>
+                          <textarea
+                            rows={2}
+                            className={inputCls}
+                            placeholder="Description shown when this type is selected..."
+                            value={vItem.short}
+                            onChange={(e) => updateVariantField(idx, 'short', e.target.value)}
+                          />
+                        </div>
+
+                        <div>
+                          <label className="block text-[11px] font-bold uppercase tracking-wider text-shell-600">
+                            Type Specifications (one per line, "Label: value")
+                          </label>
+                          <textarea
+                            rows={4}
+                            className={`${inputCls} font-mono text-xs`}
+                            placeholder={'Expansion: 16 L/kg (≈ 80 L per 5 kg block)\nEC: Less than 0.6 mS/cm'}
+                            value={vItem.specsText}
+                            onChange={(e) => updateVariantField(idx, 'specsText', e.target.value)}
+                          />
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div className="pt-2">
@@ -673,6 +874,418 @@ function ProductsTab() {
                   className="rounded-xl bg-leaf-600 px-5 py-2 text-sm font-semibold text-white shadow transition hover:bg-leaf-700 disabled:opacity-50"
                 >
                   {busy ? 'Saving...' : 'Save Changes'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// -------------------------------------------------------------
+// TAB 2B: INFRASTRUCTURE MANAGER (CRUD — PHOTOS & VIDEOS)
+// -------------------------------------------------------------
+function InfrastructureTab() {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [uploadPct, setUploadPct] = useState(null);
+  const [loadError, setLoadError] = useState('');
+  const fileRef = useRef(null);
+
+  const EMPTY_FORM = {
+    title: '',
+    category: INFRASTRUCTURE_CATEGORIES[0] || 'Washing & Buffering',
+    description: '',
+    mediaUrl: '',
+    mediaType: 'image',
+    order: 1,
+    isActive: true,
+  };
+  const [form, setForm] = useState(EMPTY_FORM);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    setLoadError('');
+    try {
+      const data = await api.getAllInfrastructure();
+      if (Array.isArray(data) && data.length > 0) {
+        setItems(data);
+      } else {
+        setItems(DEFAULT_INFRASTRUCTURE);
+      }
+    } catch (e) {
+      setItems(DEFAULT_INFRASTRUCTURE);
+      setLoadError(e.message || 'Could not load infrastructure items from server.');
+    }
+    setLoading(false);
+  }, []);
+
+  useEffect(() => {
+    load();
+  }, [load]);
+
+  const openNew = () => {
+    setEditing(null);
+    setForm({
+      ...EMPTY_FORM,
+      order: items.length + 1,
+    });
+    setModalOpen(true);
+  };
+
+  const openEdit = (item) => {
+    setEditing(item);
+    setForm({
+      title: item.title || '',
+      category: item.category || INFRASTRUCTURE_CATEGORIES[0],
+      description: item.description || '',
+      mediaUrl: item.mediaUrl || '',
+      mediaType: item.mediaType === 'video' ? 'video' : 'image',
+      order: item.order ?? 1,
+      isActive: item.isActive !== false,
+    });
+    setModalOpen(true);
+  };
+
+  const handleUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const isVid = file.type.startsWith('video/');
+    setUploadPct(0);
+    try {
+      const { url } = await api.upload(file, setUploadPct);
+      setForm((prev) => ({
+        ...prev,
+        mediaUrl: url,
+        mediaType: isVid ? 'video' : 'image',
+      }));
+    } catch (er) {
+      alert('Upload failed: ' + er.message);
+    }
+    setUploadPct(null);
+    e.target.value = '';
+  };
+
+  const toggleActive = async (item) => {
+    if (!item._id) return;
+    try {
+      await api.updateInfrastructure(item._id, { isActive: item.isActive === false });
+      await load();
+    } catch (er) {
+      alert('Could not update status: ' + er.message);
+    }
+  };
+
+  const remove = async (id) => {
+    if (!id) return;
+    if (!window.confirm('Delete this infrastructure photo/video item?')) return;
+    try {
+      await api.deleteInfrastructure(id);
+      await load();
+    } catch (er) {
+      alert('Failed to delete: ' + er.message);
+    }
+  };
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setBusy(true);
+    try {
+      const payload = {
+        ...form,
+        order: Number(form.order) || 1,
+      };
+      if (editing && editing._id) {
+        await api.updateInfrastructure(editing._id, payload);
+      } else {
+        await api.createInfrastructure(payload);
+      }
+      setModalOpen(false);
+      await load();
+    } catch (er) {
+      alert('Failed to save infrastructure item: ' + er.message);
+    }
+    setBusy(false);
+  };
+
+  return (
+    <div className="space-y-6">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <div>
+          <h2 className="text-2xl font-bold text-shell-900">Infrastructure &amp; Facility Gallery</h2>
+          <p className="text-sm text-shell-600">
+            Add, edit, or upload real photos and videos of your Pollachi washing beds, drying yards, screening units, and container loading.
+          </p>
+        </div>
+        <button
+          onClick={openNew}
+          className="flex items-center gap-2 rounded-xl bg-leaf-600 px-4 py-2.5 text-sm font-semibold text-white shadow-md transition hover:bg-leaf-700"
+        >
+          <Plus size={16} /> Add Photo / Video
+        </button>
+      </div>
+
+      {loadError && (
+        <div className="flex items-center gap-2 rounded-2xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+          <AlertTriangle size={18} className="shrink-0" />
+          <span>{loadError}</span>
+        </div>
+      )}
+
+      {loading ? (
+        <div className="py-12 text-center text-sm text-shell-500">Loading infrastructure items...</div>
+      ) : (
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+          {items.map((item, idx) => {
+            const isVideo =
+              item.mediaType === 'video' ||
+              /\.(mp4|webm)$/i.test(item.mediaUrl || '') ||
+              String(item.mediaUrl || '').includes('/video/upload/');
+
+            return (
+              <div
+                key={item._id || idx}
+                className="flex flex-col justify-between rounded-2xl border border-shell-200 bg-white p-5 shadow-sm transition hover:shadow-md"
+              >
+                <div>
+                  <div className="relative h-44 w-full overflow-hidden rounded-xl bg-leaf-950">
+                    {isVideo ? (
+                      <video
+                        src={item.mediaUrl}
+                        controls
+                        preload="metadata"
+                        className={`h-full w-full object-cover ${item.isActive === false ? 'opacity-50 grayscale' : ''}`}
+                      />
+                    ) : (
+                      <img
+                        src={item.mediaUrl || '/images/factory.jpg'}
+                        alt={item.title}
+                        className={`h-full w-full object-cover ${item.isActive === false ? 'opacity-50 grayscale' : ''}`}
+                        onError={(e) => {
+                          e.currentTarget.src = '/images/factory.jpg';
+                        }}
+                      />
+                    )}
+                    <span className="absolute left-2.5 top-2.5 inline-flex items-center gap-1 rounded-full bg-leaf-950/80 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-emerald-300">
+                      {isVideo ? <Film size={11} /> : <ImageIcon size={11} />}
+                      {isVideo ? 'Video' : 'Photo'}
+                    </span>
+                  </div>
+
+                  <div className="mt-4 flex items-center justify-between gap-2">
+                    <span className="rounded-full bg-leaf-50 border border-leaf-200 px-2.5 py-0.5 text-[10px] font-bold text-leaf-800">
+                      {item.category || 'Facility'}
+                    </span>
+                    <span className="text-xs text-shell-400">Order #{item.order ?? idx + 1}</span>
+                  </div>
+
+                  <h3 className="mt-2 text-lg font-bold text-shell-900">{item.title}</h3>
+                  {item.description && (
+                    <p className="mt-1.5 text-xs text-shell-600 line-clamp-3 leading-relaxed">
+                      {item.description}
+                    </p>
+                  )}
+                </div>
+
+                <div className="mt-5 flex items-center justify-between border-t border-shell-100 pt-3">
+                  <button
+                    onClick={() => toggleActive(item)}
+                    className={`flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold transition ${
+                      item.isActive !== false
+                        ? 'bg-leaf-100 text-leaf-800 hover:bg-leaf-200'
+                        : 'bg-shell-100 text-shell-600 hover:bg-shell-200'
+                    }`}
+                  >
+                    {item.isActive !== false ? <Eye size={13} /> : <EyeOff size={13} />}
+                    {item.isActive !== false ? 'Live' : 'Hidden'}
+                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => openEdit(item)}
+                      className="flex items-center gap-1 rounded-lg border border-shell-200 px-3 py-1.5 text-xs font-bold text-shell-700 hover:bg-shell-50"
+                    >
+                      <Edit3 size={13} /> Edit
+                    </button>
+                    {item._id && (
+                      <button
+                        onClick={() => remove(item._id)}
+                        className="rounded-lg border border-red-200 p-1.5 text-red-600 hover:bg-red-50"
+                        title="Delete item"
+                      >
+                        <Trash2 size={14} />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+
+      {modalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm">
+          <div className="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white p-7 shadow-2xl">
+            <div className="flex items-center justify-between border-b border-shell-100 pb-4">
+              <h3 className="font-head text-xl font-bold text-shell-900">
+                {editing ? `Edit: ${editing.title}` : 'Add Facility Photo or Video'}
+              </h3>
+              <button
+                onClick={() => setModalOpen(false)}
+                className="rounded-full p-1 text-shell-400 hover:bg-shell-100 hover:text-shell-700"
+              >
+                <X size={20} />
+              </button>
+            </div>
+
+            <form onSubmit={submit} className="mt-5 space-y-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-shell-700">
+                  Title *
+                </label>
+                <input
+                  required
+                  className={inputCls}
+                  placeholder="e.g. Own Freshwater Washing & Buffering Bed"
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                />
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-shell-700">
+                    Facility Section / Category
+                  </label>
+                  <select
+                    className={inputCls}
+                    value={form.category}
+                    onChange={(e) => setForm({ ...form, category: e.target.value })}
+                  >
+                    {INFRASTRUCTURE_CATEGORIES.map((c) => (
+                      <option key={c} value={c}>
+                        {c}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-shell-700">
+                    Media Type
+                  </label>
+                  <select
+                    className={inputCls}
+                    value={form.mediaType}
+                    onChange={(e) => setForm({ ...form, mediaType: e.target.value })}
+                  >
+                    <option value="image">Photo (Image)</option>
+                    <option value="video">Video (MP4 / WebM)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-shell-700">
+                  Photo or Video File / URL *
+                </label>
+                <div className="flex gap-2">
+                  <input
+                    required
+                    className={inputCls}
+                    placeholder="Paste URL or click Upload (Images & MP4/WebM Videos)"
+                    value={form.mediaUrl}
+                    onChange={(e) => setForm({ ...form, mediaUrl: e.target.value })}
+                  />
+                  <input
+                    ref={fileRef}
+                    type="file"
+                    hidden
+                    accept="image/jpeg,image/png,image/webp,video/mp4,video/webm"
+                    onChange={handleUpload}
+                  />
+                  <button
+                    type="button"
+                    disabled={uploadPct !== null}
+                    onClick={() => fileRef.current.click()}
+                    className="flex shrink-0 items-center gap-1.5 rounded-xl border border-shell-300 bg-shell-100 px-3.5 py-2 text-xs font-bold text-shell-800 hover:bg-shell-200 disabled:opacity-50"
+                  >
+                    <Upload size={14} /> Upload
+                  </button>
+                </div>
+                {uploadPct !== null && (
+                  <div className="mt-3 flex justify-center">
+                    <GrowLoader overlay={false} progress={uploadPct} label="Uploading media" />
+                  </div>
+                )}
+                {form.mediaUrl && uploadPct === null && (
+                  <div className="mt-2 h-32 w-48 overflow-hidden rounded-xl border border-shell-200 bg-black">
+                    {form.mediaType === 'video' ? (
+                      <video src={form.mediaUrl} controls className="h-full w-full object-cover" />
+                    ) : (
+                      <img src={form.mediaUrl} alt="" className="h-full w-full object-cover" />
+                    )}
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-shell-700">
+                  Description
+                </label>
+                <textarea
+                  rows={3}
+                  className={inputCls}
+                  placeholder="Describe this unit, equipment, capacity, or process..."
+                  value={form.description}
+                  onChange={(e) => setForm({ ...form, description: e.target.value })}
+                />
+              </div>
+
+              <div className="grid gap-3 sm:grid-cols-2 items-center">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-shell-700">
+                    Display Order
+                  </label>
+                  <input
+                    type="number"
+                    className={inputCls}
+                    value={form.order}
+                    onChange={(e) => setForm({ ...form, order: e.target.value })}
+                  />
+                </div>
+                <div className="pt-5">
+                  <label className="flex items-center gap-2 cursor-pointer text-sm font-semibold text-shell-800">
+                    <input
+                      type="checkbox"
+                      checked={form.isActive}
+                      onChange={(e) => setForm({ ...form, isActive: e.target.checked })}
+                      className="h-4 w-4 rounded text-leaf-600 focus:ring-leaf-500"
+                    />
+                    Published on Infrastructure page
+                  </label>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4 border-t border-shell-100">
+                <button
+                  type="button"
+                  onClick={() => setModalOpen(false)}
+                  className="rounded-xl border border-shell-200 px-4 py-2 text-sm font-semibold text-shell-700 hover:bg-shell-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={busy}
+                  className="rounded-xl bg-leaf-600 px-5 py-2 text-sm font-semibold text-white shadow transition hover:bg-leaf-700 disabled:opacity-50"
+                >
+                  {busy ? 'Saving...' : 'Save Item'}
                 </button>
               </div>
             </form>
@@ -1604,6 +2217,7 @@ function Dashboard({ email, onLogout }) {
   const tabs = [
     { key: 'enquiries', label: 'Enquiries', icon: Inbox },
     { key: 'products', label: 'Products', icon: Package },
+    { key: 'infrastructure', label: 'Infrastructure', icon: Building2 },
     { key: 'blogs', label: 'Blog Articles', icon: FileText },
     { key: 'faqs', label: 'FAQs', icon: HelpCircle },
     { key: 'media', label: 'Media & Branding', icon: ImageIcon },
@@ -1675,6 +2289,7 @@ function Dashboard({ email, onLogout }) {
       <main className="mx-auto max-w-7xl px-6 py-8">
         {tab === 'enquiries' && <EnquiriesTab />}
         {tab === 'products' && <ProductsTab />}
+        {tab === 'infrastructure' && <InfrastructureTab />}
         {tab === 'blogs' && <BlogsTab />}
         {tab === 'faqs' && <FaqsTab />}
         {tab === 'media' && <MediaTab />}

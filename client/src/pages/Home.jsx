@@ -8,6 +8,240 @@ import ProductShowcase from '../components/ProductShowcase';
 import FactoryVideoPlayer from '../components/FactoryVideoPlayer';
 import { useProducts } from '../lib/useProducts';
 
+const HYDROPONIC_CROPS = [
+  {
+    name: 'Raspberries',
+    svg: (
+      <svg viewBox="0 0 120 120" className="h-24 w-24 sm:h-28 sm:w-28 drop-shadow-sm transition-transform duration-300 group-hover:scale-110">
+        <g stroke="#1b3b28" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+          {/* Outer drupelets */}
+          <circle cx="42" cy="36" r="11" fill="#c93b5b" />
+          <circle cx="60" cy="30" r="11" fill="#d94668" />
+          <circle cx="78" cy="36" r="11" fill="#c93b5b" />
+          <circle cx="32" cy="52" r="11" fill="#b83250" />
+          <circle cx="88" cy="52" r="11" fill="#b83250" />
+          <circle cx="33" cy="70" r="11" fill="#c93b5b" />
+          <circle cx="87" cy="70" r="11" fill="#a82845" />
+          <circle cx="42" cy="86" r="10.5" fill="#b83250" />
+          <circle cx="78" cy="86" r="10.5" fill="#a82845" />
+          <circle cx="60" cy="94" r="11" fill="#b83250" />
+          {/* Inner drupelets */}
+          <circle cx="46" cy="52" r="11" fill="#e05273" />
+          <circle cx="74" cy="52" r="11" fill="#d94668" />
+          <circle cx="60" cy="62" r="11.5" fill="#e05273" />
+          <circle cx="48" cy="72" r="11" fill="#c93b5b" />
+          <circle cx="72" cy="72" r="11" fill="#c93b5b" />
+          <circle cx="60" cy="80" r="11" fill="#d94668" />
+          {/* Hollow core */}
+          <ellipse cx="60" cy="43" rx="13" ry="8" fill="#7a1c33" />
+          {/* Subtle leaf accent */}
+          <path d="M52 24 C46 14, 34 16, 38 25 Z" fill="#4d8b55" />
+          <path d="M68 24 C74 14, 86 16, 82 25 Z" fill="#5da065" />
+        </g>
+      </svg>
+    ),
+  },
+  {
+    name: 'Blueberries',
+    svg: (
+      <svg viewBox="0 0 120 120" className="h-24 w-24 sm:h-28 sm:w-28 drop-shadow-sm transition-transform duration-300 group-hover:scale-110">
+        <g stroke="#1b3b28" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="60" cy="62" r="37" fill="#355c8a" />
+          {/* Soft highlight */}
+          <path d="M35 45 A28 28 0 0 1 76 34" fill="none" stroke="#5982b3" strokeWidth="3.5" />
+          {/* Berry star calyx */}
+          <polygon
+            points="60,35 64,43 73,41 67,48 72,55 63,53 58,60 55,52 46,53 52,46 48,39 56,42"
+            fill="#c5b37a"
+          />
+          <circle cx="60" cy="47" r="3.5" fill="#1b3b28" />
+        </g>
+      </svg>
+    ),
+  },
+  {
+    name: 'Blackberries',
+    svg: (
+      <svg viewBox="0 0 120 120" className="h-24 w-24 sm:h-28 sm:w-28 drop-shadow-sm transition-transform duration-300 group-hover:scale-110">
+        <g stroke="#2a4a37" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
+          <circle cx="44" cy="36" r="10.5" fill="#1e192b" />
+          <circle cx="60" cy="31" r="10.5" fill="#2d2540" />
+          <circle cx="76" cy="36" r="10.5" fill="#1e192b" />
+          <circle cx="34" cy="51" r="11" fill="#251f36" />
+          <circle cx="86" cy="51" r="11" fill="#181324" />
+          <circle cx="35" cy="69" r="11" fill="#1e192b" />
+          <circle cx="85" cy="69" r="11" fill="#181324" />
+          <circle cx="43" cy="85" r="10.5" fill="#251f36" />
+          <circle cx="77" cy="85" r="10.5" fill="#181324" />
+          <circle cx="60" cy="93" r="11" fill="#1e192b" />
+          <circle cx="47" cy="52" r="11" fill="#332a47" />
+          <circle cx="73" cy="52" r="11" fill="#251f36" />
+          <circle cx="60" cy="62" r="11.5" fill="#332a47" />
+          <circle cx="49" cy="73" r="11" fill="#251f36" />
+          <circle cx="71" cy="73" r="11" fill="#1e192b" />
+          <circle cx="60" cy="80" r="10.5" fill="#2d2540" />
+          <ellipse cx="60" cy="44" rx="11" ry="7" fill="#110d19" />
+          {/* Calyx leaf */}
+          <path d="M52 24 C46 15, 36 17, 40 25 Z" fill="#4d8b55" stroke="#1b3b28" />
+          <path d="M68 24 C74 15, 84 17, 80 25 Z" fill="#3f7847" stroke="#1b3b28" />
+        </g>
+      </svg>
+    ),
+  },
+  {
+    name: 'Strawberries',
+    svg: (
+      <svg viewBox="0 0 120 120" className="h-24 w-24 sm:h-28 sm:w-28 drop-shadow-sm transition-transform duration-300 group-hover:scale-110">
+        <g stroke="#1b3b28" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+          {/* Body */}
+          <path
+            d="M60 32 C84 32, 94 52, 84 76 C75 96, 66 102, 60 102 C54 102, 45 96, 36 76 C26 52, 36 32, 60 32 Z"
+            fill="#d63e4f"
+          />
+          {/* Leafy crown */}
+          <path
+            d="M60 34 L42 22 L49 34 L32 33 L48 41 L60 36 L72 41 L88 33 L71 34 L78 22 Z"
+            fill="#569e54"
+          />
+          <path d="M60 32 L63 18" strokeWidth="3" />
+          {/* Seeds */}
+          <ellipse cx="48" cy="52" rx="1.6" ry="2.8" fill="#1b3b28" />
+          <ellipse cx="60" cy="50" rx="1.6" ry="2.8" fill="#1b3b28" />
+          <ellipse cx="72" cy="53" rx="1.6" ry="2.8" fill="#1b3b28" />
+          <ellipse cx="44" cy="67" rx="1.6" ry="2.8" fill="#1b3b28" />
+          <ellipse cx="56" cy="65" rx="1.6" ry="2.8" fill="#1b3b28" />
+          <ellipse cx="68" cy="66" rx="1.6" ry="2.8" fill="#1b3b28" />
+          <ellipse cx="77" cy="68" rx="1.6" ry="2.8" fill="#1b3b28" />
+          <ellipse cx="51" cy="80" rx="1.6" ry="2.8" fill="#1b3b28" />
+          <ellipse cx="63" cy="81" rx="1.6" ry="2.8" fill="#1b3b28" />
+          <ellipse cx="58" cy="92" rx="1.5" ry="2.5" fill="#1b3b28" />
+        </g>
+      </svg>
+    ),
+  },
+  {
+    name: 'Tomatoes',
+    svg: (
+      <svg viewBox="0 0 120 120" className="h-24 w-24 sm:h-28 sm:w-28 drop-shadow-sm transition-transform duration-300 group-hover:scale-110">
+        <g stroke="#1b3b28" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+          <ellipse cx="60" cy="65" rx="37" ry="32" fill="#de4a3f" />
+          <path d="M78 46 A24 20 0 0 1 88 68" fill="none" stroke="#f2796f" strokeWidth="3" />
+          {/* Stem & calyx */}
+          <path
+            d="M60 36 L50 25 L55 36 L39 36 L54 42 L51 49 L60 42 L69 49 L66 42 L81 36 L65 36 L70 25 Z"
+            fill="#569e54"
+          />
+          <path d="M60 36 C60 28, 64 23, 67 21" fill="none" strokeWidth="3" />
+        </g>
+      </svg>
+    ),
+  },
+  {
+    name: 'Aubergines',
+    svg: (
+      <svg viewBox="0 0 120 120" className="h-24 w-24 sm:h-28 sm:w-28 drop-shadow-sm transition-transform duration-300 group-hover:scale-110">
+        <g stroke="#1b3b28" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+          <path
+            d="M36 34 C46 30, 68 42, 82 58 C96 74, 92 95, 74 98 C54 101, 38 82, 33 62 C29 46, 30 37, 36 34 Z"
+            fill="#84438f"
+          />
+          <path d="M68 56 C80 68, 84 82, 76 90" fill="none" stroke="#a665b0" strokeWidth="3" />
+          {/* Green cap */}
+          <path
+            d="M30 28 L36 34 L31 48 L41 41 L47 50 L49 39 L58 39 L46 31 L36 32 Z"
+            fill="#5ca356"
+          />
+          <path d="M34 32 L26 24" strokeWidth="3.2" />
+        </g>
+      </svg>
+    ),
+  },
+  {
+    name: 'Peppers',
+    svg: (
+      <svg viewBox="0 0 120 120" className="h-24 w-24 sm:h-28 sm:w-28 drop-shadow-sm transition-transform duration-300 group-hover:scale-110">
+        <g stroke="#1b3b28" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+          {/* Stem */}
+          <path d="M56 34 L53 20 L63 20 L65 34 Z" fill="#4f944d" />
+          {/* Back & Side lobes */}
+          <path
+            d="M46 34 C29 33, 27 56, 32 82 C35 96, 44 99, 50 96"
+            fill="#c93b32"
+          />
+          <path
+            d="M74 34 C91 33, 93 56, 88 82 C85 96, 76 99, 70 96"
+            fill="#c93b32"
+          />
+          {/* Center lobe */}
+          <path
+            d="M46 35 C52 31, 68 31, 74 35 C78 55, 76 82, 70 97 C64 101, 56 101, 50 97 C44 82, 42 55, 46 35 Z"
+            fill="#e04b42"
+          />
+        </g>
+      </svg>
+    ),
+  },
+  {
+    name: 'Cucumbers',
+    svg: (
+      <svg viewBox="0 0 120 120" className="h-24 w-24 sm:h-28 sm:w-28 drop-shadow-sm transition-transform duration-300 group-hover:scale-110">
+        <g stroke="#1b3b28" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+          <path
+            d="M30 34 C38 30, 56 46, 72 62 C86 76, 96 86, 90 94 C84 100, 64 94, 46 76 C30 60, 24 38, 30 34 Z"
+            fill="#6cb043"
+          />
+          {/* Subtle ridges */}
+          <path d="M36 42 C48 56, 64 72, 82 84" fill="none" stroke="#457d26" strokeWidth="2" />
+          <path d="M33 50 C44 65, 58 79, 75 89" fill="none" stroke="#457d26" strokeWidth="2" />
+          <path d="M29 34 L24 27" strokeWidth="2.8" />
+        </g>
+      </svg>
+    ),
+  },
+  {
+    name: 'Cannabis',
+    svg: (
+      <svg viewBox="0 0 120 120" className="h-24 w-24 sm:h-28 sm:w-28 drop-shadow-sm transition-transform duration-300 group-hover:scale-110">
+        <g stroke="#1b3b28" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="#6bb344">
+          {/* Center leaflet */}
+          <path d="M60 82 C54 60, 55 34, 60 18 C65 34, 66 60, 60 82 Z" />
+          {/* Upper left & right leaflets */}
+          <path d="M60 82 C46 66, 36 46, 29 33 C43 42, 54 60, 60 82 Z" />
+          <path d="M60 82 C74 66, 84 46, 91 33 C77 42, 66 60, 60 82 Z" />
+          {/* Mid left & right leaflets */}
+          <path d="M60 82 C44 78, 29 73, 20 68 C33 68, 48 73, 60 82 Z" />
+          <path d="M60 82 C76 78, 91 73, 100 68 C87 68, 72 73, 60 82 Z" />
+          {/* Lower small leaflets */}
+          <path d="M60 82 C51 86, 42 90, 36 93 C43 86, 52 83, 60 82 Z" />
+          <path d="M60 82 C69 86, 78 90, 84 93 C77 86, 68 83, 60 82 Z" />
+          {/* Stem */}
+          <path d="M60 82 L60 102" strokeWidth="2.8" />
+        </g>
+      </svg>
+    ),
+  },
+  {
+    name: 'Ginger',
+    svg: (
+      <svg viewBox="0 0 120 120" className="h-24 w-24 sm:h-28 sm:w-28 drop-shadow-sm transition-transform duration-300 group-hover:scale-110">
+        <g stroke="#1b3b28" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
+          <path
+            d="M46 96 C41 84, 42 74, 34 72 C24 70, 22 58, 31 56 C38 55, 42 62, 44 52 C45 40, 38 30, 48 23 C58 17, 68 26, 66 38 C65 46, 64 54, 72 48 C78 42, 82 28, 92 32 C100 36, 98 50, 90 58 C84 64, 78 72, 74 84 C70 94, 54 102, 46 96 Z"
+            fill="#d4a238"
+          />
+          {/* Cut face highlight */}
+          <ellipse cx="58" cy="91" rx="11" ry="6" transform="rotate(-18 58 91)" fill="#f0cf65" />
+          {/* Natural root ring lines */}
+          <path d="M46 35 C52 33, 58 34, 63 37" fill="none" stroke="#785616" strokeWidth="1.8" />
+          <path d="M46 48 C53 46, 58 47, 62 50" fill="none" stroke="#785616" strokeWidth="1.8" />
+          <path d="M80 42 C85 43, 89 46, 91 50" fill="none" stroke="#785616" strokeWidth="1.8" />
+          <path d="M47 68 C55 66, 64 68, 72 72" fill="none" stroke="#785616" strokeWidth="1.8" />
+        </g>
+      </svg>
+    ),
+  },
+];
+
 function HomeFaqItem({ q, a }) {
   const [open, setOpen] = useState(false);
   return (
@@ -100,6 +334,38 @@ export default function Home() {
             <span className="flex items-center gap-1.5"><CheckCircle2 size={14} className="text-emerald-400" /> RHP / SA 8000 Certified</span>
             <span className="flex items-center gap-1.5"><CheckCircle2 size={14} className="text-emerald-400" /> Low EC &lt; 0.5 mS/cm</span>
             <span className="flex items-center gap-1.5"><CheckCircle2 size={14} className="text-emerald-400" /> Worldwide 40ft HC Shipping</span>
+          </div>
+        </div>
+      </section>
+
+      {/* HYDROPONIC CROPS SECTION */}
+      <section className="relative overflow-hidden bg-white py-20 border-b border-shell-200/70">
+        <div className="mx-auto max-w-6xl px-6 text-center">
+          <Reveal>
+            <h2 className="font-head text-2xl sm:text-4xl md:text-[42px] font-bold tracking-tight text-leaf-900">
+              Coir Substrates for Hydroponic Growing Systems
+            </h2>
+            <p className="mx-auto mt-4 max-w-4xl text-sm sm:text-base md:text-lg text-shell-700 leading-relaxed">
+              Crop-specific coir substrates formulated to yield the highest quality strawberries, blueberries,
+              raspberries, blackberries, tomatoes, peppers, cucumbers, eggplants, herbs, micro greens and flowers.
+            </p>
+          </Reveal>
+
+          <div className="mt-12 grid grid-cols-2 gap-y-10 gap-x-6 sm:grid-cols-3 md:grid-cols-5 md:gap-y-12 md:gap-x-8">
+            {HYDROPONIC_CROPS.map((crop, idx) => (
+              <Reveal
+                key={crop.name}
+                delay={idx * 50}
+                className="group flex flex-col items-center justify-center"
+              >
+                <div className="flex h-28 w-28 sm:h-32 sm:w-32 items-center justify-center rounded-3xl bg-shell-50/70 border border-shell-200/70 p-3 shadow-sm transition-all duration-300 group-hover:border-leaf-300 group-hover:bg-leaf-50/50 group-hover:shadow-md">
+                  {crop.svg}
+                </div>
+                <span className="mt-3.5 font-head text-sm sm:text-base font-bold tracking-wide text-shell-800 group-hover:text-leaf-800 transition-colors">
+                  {crop.name}
+                </span>
+              </Reveal>
+            ))}
           </div>
         </div>
       </section>

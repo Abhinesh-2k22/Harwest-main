@@ -50,8 +50,9 @@ router.post('/login', loginLimiter, csrfGuard, async (req, res) => {
   admin.failedAttempts = 0;
   admin.lockUntil = null;
   await admin.save();
-  res.cookie(config.cookieName, signSession(admin), cookieOptions());
-  res.json({ email: admin.email });
+  const token = signSession(admin);
+  res.cookie(config.cookieName, token, cookieOptions());
+  res.json({ email: admin.email, token });
 });
 
 router.post('/logout', csrfGuard, (_req, res) => {
@@ -73,8 +74,9 @@ router.post('/change-password', requireAdmin, csrfGuard, loginLimiter, async (re
   admin.passwordHash = await bcrypt.hash(newPassword, 12);
   admin.tokenVersion += 1; // logs out every other session
   await admin.save();
-  res.cookie(config.cookieName, signSession(admin), cookieOptions());
-  res.json({ ok: true });
+  const token = signSession(admin);
+  res.cookie(config.cookieName, token, cookieOptions());
+  res.json({ ok: true, token });
 });
 
 export default router;
