@@ -81,7 +81,7 @@ export const PRODUCT_CATEGORIES = [
   'Horticulture',
 ];
 
-// Offline fallback only — the live catalogue comes from the database (editable in Admin).
+// Offline fallback only ï¿½ the live catalogue comes from the database (editable in Admin).
 export const PRODUCTS = [
   {
     id: 'coir-pith-blocks',

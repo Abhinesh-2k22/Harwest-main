@@ -14,3 +14,4 @@ console.log(`🗑️  Removed ${removed.deletedCount} existing product(s).`);
 await Product.insertMany(CATALOGUE);
 console.log(`✅ Inserted ${CATALOGUE.length} products: ${CATALOGUE.map((p) => p.name).join(' | ')}`);
 await mongoose.disconnect();
+
