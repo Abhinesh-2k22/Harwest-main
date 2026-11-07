@@ -1,0 +1,97 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Poppins", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-display: "Poppins", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-head: "Poppins", -apple-system, BlinkMacSystemFont, sans-serif;
+
+  /* Premium Deep Forest / Botanical Green */
+  --color-leaf-50: #f2f7f2;
+  --color-leaf-100: #dcebdc;
+  --color-leaf-200: #b9d7bc;
+  --color-leaf-300: #8fbe94;
+  --color-leaf-400: #619d67;
+  --color-leaf-500: #3f7c46;
+  --color-leaf-600: #2e6334;
+  --color-leaf-700: #234c28;
+  --color-leaf-800: #1a381e;
+  --color-leaf-900: #122415;
+  --color-leaf-950: #0a150c;
+
+  /* Natural Coir Husk & Roasted Shell Brown */
+  --color-shell-50: #faf7f2;
+  --color-shell-100: #f4ecdf;
+  --color-shell-200: #e5d7c4;
+  --color-shell-300: #cfb59b;
+  --color-shell-400: #b58d6b;
+  --color-shell-500: #966743;
+  --color-shell-600: #7b5030;
+  --color-shell-700: #5f3c22;
+  --color-shell-800: #442916;
+  --color-shell-900: #29180b;
+
+  /* Dedicated Warm Coconut Brown (Replaces electric yellow) */
+  --color-coconut-50: #fbf8f4;
+  --color-coconut-100: #f5ebe0;
+  --color-coconut-200: #e8d3bf;
+  --color-coconut-300: #dab99b;
+  --color-coconut-400: #c89a6f;
+  --color-coconut-500: #ab7649;
+  --color-coconut-600: #8c5a31;
+  --color-coconut-700: #6f4220;
+  --color-coconut-800: #533017;
+  --color-coconut-900: #381f0d;
+
+  --animate-sway: sway 6s ease-in-out infinite;
+  --animate-float: float 7s ease-in-out infinite;
+  --animate-rise: rise 0.8s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-kenburns: kenburns 22s ease-in-out infinite alternate;
+  --animate-pulse-slow: pulseSlow 3s ease-in-out infinite;
+
+  @keyframes sway { 0%,100% { transform: rotate(-3deg); } 50% { transform: rotate(4deg); } }
+  @keyframes float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+  @keyframes rise { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+  @keyframes kenburns { from { transform: scale(1); } to { transform: scale(1.08); } }
+  @keyframes pulseSlow { 0%, 100% { opacity: 0.9; transform: scale(1); } 50% { opacity: 1; transform: scale(1.03); } }
+}
+
+html { scroll-behavior: smooth; }
+body {
+  font-family: var(--font-sans);
+  color: var(--color-shell-900);
+  background: var(--color-shell-50);
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3, h4, h5, h6 { font-family: var(--font-display); letter-spacing: -0.015em; font-feature-settings: "cv02", "cv03", "cv04", "cv11"; }
+
+/* Soft coir-fibre grain overlay */
+.grain::before {
+  content: "";
+  position: absolute; inset: 0; pointer-events: none; opacity: .06; mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='160' height='160'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+/* Scroll reveal */
+.reveal { opacity: 0; transform: translateY(32px); transition: opacity .9s cubic-bezier(.22,1,.36,1), transform .9s cubic-bezier(.22,1,.36,1); }
+.reveal.in { opacity: 1; transform: none; }
+
+/* Leaf-shaped organic radius */
+.leaf-radius { border-radius: 2.5rem 0.75rem 2.5rem 0.75rem; }
+
+/* Earthy warm card styling */
+.earth-card {
+  background: #ffffff;
+  border: 1px solid var(--color-shell-200);
+  box-shadow: 0 4px 20px -2px rgba(68, 41, 22, 0.05);
+}
+
+/* Subtle botanical / faint leaf watermark pattern */
+.leaf-pattern {
+  background-image: radial-gradient(rgba(45, 90, 55, 0.05) 1px, transparent 1px),
+    url("data:image/svg+xml,%3Csvg width='120' height='120' viewBox='0 0 120 120' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M30,10 C45,15 60,35 55,60 C50,85 25,100 10,95 C-5,90 5,60 15,35 C20,20 25,12 30,10 Z' fill='none' stroke='rgba(46,99,52,0.045)' stroke-width='1.5'/%3E%3Cpath d='M85,30 C100,35 115,55 110,80 C105,105 80,120 65,115 C50,110 60,80 70,55 C75,40 80,32 85,30 Z' fill='none' stroke='rgba(147,92,52,0.045)' stroke-width='1.5'/%3E%3C/svg%3E");
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+  .reveal { opacity: 1; transform: none; }
+}
