@@ -377,20 +377,20 @@ export default function Home() {
       </section>
 
       {/* PRODUCTS SECTION */}
-      <section className="mx-auto max-w-7xl px-6 py-20">
+      <section className="mx-auto max-w-7xl px-6 pt-16 sm:pt-20 pb-6 sm:pb-8">
         <SectionTitle
           eyebrow="Our products"
           title="Grown by nature, refined for growers"
           text="From hydroponic grow bags to orchid-friendly chips — one husk, endless harvests."
         />
         <ProductShowcase products={products} />
-        <div className="mt-12 text-center">
+        <div className="mt-8 sm:mt-10 text-center">
           <Button to="/products">View Full Technical Catalogue <ArrowRight size={16} /></Button>
         </div>
       </section>
 
       {/* PROCESS */}
-      <section className="mx-auto max-w-7xl px-6 py-24">
+      <section className="mx-auto max-w-7xl px-6 pt-4 sm:pt-6 pb-14 sm:pb-16">
         <SectionTitle center eyebrow="From husk to harvest" title="Our natural process" />
         {/* Mobile: swipeable horizontal row · Desktop: 4-column grid */}
         <div className="relative -mx-6 mt-12 flex snap-x snap-mandatory gap-4 overflow-x-auto px-6 pb-4 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden md:mx-0 md:mt-16 md:grid md:grid-cols-4 md:gap-8 md:overflow-visible md:px-0 md:pb-0">
@@ -412,7 +412,7 @@ export default function Home() {
       </section>
 
       {/* FACTORY VIDEO SECTION */}
-      <section className="px-6 pb-24">
+      <section className="px-6 pb-6 sm:pb-8">
         <div className="mx-auto max-w-6xl mb-8 text-center">
           <span className="font-head text-xs uppercase tracking-[.25em] text-leaf-700 font-bold">
             Processing Yard &amp; Facility
@@ -430,7 +430,7 @@ export default function Home() {
       </section>
 
       {/* FAQ SECTION */}
-      <section className="mx-auto max-w-4xl px-5 py-14 sm:px-6 sm:py-24">
+      <section className="mx-auto max-w-4xl px-5 pt-4 sm:pt-6 pb-12 sm:pb-16 sm:px-6">
         <div className="max-md:scale-[0.9] max-md:origin-top">
           <SectionTitle
             center
@@ -452,7 +452,7 @@ export default function Home() {
       </section>
 
       {/* CTA SECTION */}
-      <section className="px-6 pb-28">
+      <section className="px-6 pb-6 sm:pb-8">
         <div className="grain relative mx-auto max-w-6xl overflow-hidden leaf-radius bg-gradient-to-br from-leaf-800 to-leaf-950 px-8 py-16 text-center text-white shadow-2xl border border-leaf-700/40">
           <h2 className="mx-auto max-w-2xl text-4xl font-bold md:text-5xl">Ready to Grow with HarWest?</h2>
           <p className="mx-auto mt-4 max-w-xl text-white/80">

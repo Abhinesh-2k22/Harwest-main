@@ -98,6 +98,22 @@ const TIMEZONE_TO_COUNTRY = {
   'Africa/Casablanca': 'Morocco',
 };
 
+// Paths that must never be counted (case-insensitive): admin panel + health/uptime checks
+const EXCLUDED_PATH_PREFIXES = ['/admin', '/health', '/api/health', '/api/'];
+function isExcludedPath(rawPath) {
+  const p = String(rawPath || '/').toLowerCase().split('?')[0].split('#')[0];
+  return EXCLUDED_PATH_PREFIXES.some((prefix) => p === prefix.replace(/\/$/, '') || p.startsWith(prefix));
+}
+
+// Uptime monitors, crawlers, headless browsers & audit tools that may execute JS and hit /visit
+const BOT_UA_PATTERN =
+  /uptimerobot|uptime-kuma|pingdom|statuscake|better ?uptime|site24x7|freshping|hetrixtools|newrelic|datadog|healthcheck|\bbot\b|bot\/|crawler|spider|slurp|bingpreview|googlebot|google-inspectiontool|adsbot|mediapartners|lighthouse|pagespeed|chrome-lighthouse|gtmetrix|headlesschrome|phantomjs|puppeteer|playwright|selenium|curl\/|wget\/|python-requests|axios\/|node-fetch|go-http-client|okhttp|java\/|facebookexternalhit|whatsapp|telegrambot|slackbot|discordbot|linkedinbot|twitterbot/i;
+function isBotRequest(req) {
+  const ua = String(req.headers['user-agent'] || '');
+  if (!ua.trim()) return true; // Real browsers always send a User-Agent
+  return BOT_UA_PATTERN.test(ua);
+}
+
 function getIstDateKey(date = new Date()) {
   return new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(date);
 }
@@ -210,8 +226,8 @@ router.post('/visit', async (req, res) => {
     const tz = req.body?.tz || '';
     const clientIsNewVisit = Boolean(req.body?.isNewVisit);
 
-    // Don't count admin or health check hits as public website visits
-    if (String(path).startsWith('/admin') || String(path).startsWith('/health')) {
+    // Don't count admin, health-check / uptime-monitor or bot hits as public website visits
+    if (isExcludedPath(path) || isBotRequest(req)) {
       return res.json({ ok: true, ignored: true });
     }
 

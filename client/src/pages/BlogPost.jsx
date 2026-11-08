@@ -62,7 +62,7 @@ export default function BlogPost() {
   const currentUrl = encodeURIComponent(window.location.href);
 
   return (
-    <article className="pt-32 pb-24">
+    <article className="pt-32 pb-6 sm:pb-8">
       {/* HEADER SECTION (Inspired by kayacoir article page) */}
       <div className="mx-auto max-w-4xl px-6">
         {/* Breadcrumb */}

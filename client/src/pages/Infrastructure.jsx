@@ -161,7 +161,7 @@ export default function Infrastructure() {
       </section>
 
       {/* QUALITY & EXPORT CAPABILITY BANNER */}
-      <section className="px-6 pb-28 pt-8">
+      <section className="px-6 pb-6 sm:pb-8 pt-4 sm:pt-6">
         <div className="grain relative mx-auto max-w-6xl overflow-hidden leaf-radius bg-gradient-to-br from-leaf-800 to-leaf-950 px-8 py-14 text-white shadow-2xl border border-leaf-700/40">
           <div className="grid items-center gap-8 lg:grid-cols-12">
             <div className="lg:col-span-8">

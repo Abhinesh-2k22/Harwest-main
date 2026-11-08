@@ -186,7 +186,7 @@ function Footer() {
   };
 
   return (
-    <footer className="relative isolate mt-24 overflow-hidden bg-gradient-to-b from-leaf-800 via-leaf-900 to-leaf-950 text-shell-100">
+    <footer className="relative isolate mt-6 sm:mt-8 overflow-hidden bg-gradient-to-b from-leaf-800 via-leaf-900 to-leaf-950 text-shell-100">
       {/* Botanical line-art pattern (leaves, berries, tomatoes…) tinted into the green theme */}
       <div
         aria-hidden="true"
@@ -355,11 +355,24 @@ function Footer() {
   );
 }
 
+// Guards against React StrictMode's double-invoked effects (dev) and accidental duplicate fires
+let lastTrackedPath = null;
+let lastTrackedAt = 0;
+
 export default function Layout() {
   const { pathname } = useLocation();
 
   // Record 1 website visit per user session, and record each tab navigation under Tab Clicks
   useEffect(() => {
+    const lower = String(pathname || '/').toLowerCase();
+    // Never track the health/status page or admin panel
+    if (lower.startsWith('/health') || lower.startsWith('/admin')) return;
+
+    const now = Date.now();
+    if (lastTrackedPath === pathname && now - lastTrackedAt < 1500) return;
+    lastTrackedPath = pathname;
+    lastTrackedAt = now;
+
     let isNewVisit = false;
     try {
       if (!sessionStorage.getItem('hw_session_visit_counted')) {

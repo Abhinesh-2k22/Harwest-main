@@ -126,7 +126,7 @@ export default function About() {
       </section>
 
       {/* MADE WITH CARE: RAW MATERIAL, ENERGY, WATER (As requested from kayacoir) */}
-      <section className="mx-auto max-w-6xl px-6 py-24">
+      <section className="mx-auto max-w-6xl px-6 pt-12 sm:pt-16 pb-6 sm:pb-8">
         <SectionTitle
           center
           eyebrow="Eco Stewardship"

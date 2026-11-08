@@ -469,7 +469,7 @@ export default function Products() {
         image="products.image"
         video="products.video"
       />
-      <div className="mx-auto max-w-7xl space-y-24 px-6 py-20">
+      <div className="mx-auto max-w-7xl space-y-24 px-6 pt-12 sm:pt-16 pb-6 sm:pb-8">
         {items.length === 0 && (
           <p className="py-16 text-center text-shell-600">Our catalogue is being updated. Please check back soon.</p>
         )}

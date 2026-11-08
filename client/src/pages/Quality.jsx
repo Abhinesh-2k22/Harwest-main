@@ -161,7 +161,7 @@ export default function Quality() {
       </section>
 
       {/* FAQ SECTION */}
-      <section className="mx-auto max-w-3xl px-6 pb-28">
+      <section className="mx-auto max-w-3xl px-6 pb-6 sm:pb-8">
         <SectionTitle center eyebrow="Knowledge Base" title="Frequently Asked Questions" />
         <div className="mt-10 space-y-4">
           {faqs.map((f) => (

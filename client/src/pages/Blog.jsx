@@ -45,7 +45,7 @@ export default function Blog() {
         video="blog.video"
       />
 
-      <section className="mx-auto max-w-7xl px-6 py-16">
+      <section className="mx-auto max-w-7xl px-6 pt-12 sm:pt-16 pb-6 sm:pb-8">
         {/* SEARCH & COUNT BAR */}
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pb-8 border-b border-shell-200">
           <div>

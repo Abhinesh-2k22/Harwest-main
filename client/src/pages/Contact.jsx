@@ -172,7 +172,7 @@ export default function Contact() {
         video="contact.video"
       />
 
-      <section className="mx-auto grid max-w-7xl gap-12 px-6 py-20 lg:grid-cols-12">
+      <section className="mx-auto grid max-w-7xl gap-12 px-6 pt-12 sm:pt-16 pb-6 sm:pb-8 lg:grid-cols-12">
         {/* LEFT COLUMN: Contact Cards (inspired by Kayacoir) */}
         <div className="space-y-6 lg:col-span-5">
           <div>
