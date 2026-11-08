@@ -130,35 +130,35 @@ export const CATALOGUE = [
     isActive: true,
   },
   {
-    name: 'Coir Grow Slabs',
+    name: 'Coir Naked Slabs',
     slug: 'coir-grow-slabs',
     categories: ['Grow Slabs', 'Hydroponics'],
-    variants: ['Coir Grow Slabs'],
+    variants: ['Coir Naked Slabs'],
     variantDetails: [
       {
-        name: 'Coir Grow Slabs',
-        badge: 'UV-Stabilised Hydroponic Slab',
+        name: 'Coir Naked Slabs',
+        badge: 'Compressed Hydroponic Naked Slab',
         short:
-          'Ready-to-use UV-stabilised co-extruded grow slabs engineered with precision coco peat & husk chip matrices for commercial greenhouse tomatoes, cucumbers, peppers and strawberries.',
+          'Ready-to-expand compressed coir naked slabs engineered with precision coco peat & husk chip matrices for commercial greenhouse troughs, grow channels, tomatoes, cucumbers, peppers and strawberries.',
         image: '/images/growbags.jpg',
         specs: {
           'Standard Dimensions': '100 × 15 × 8 cm / 100 × 15 × 10 cm / 100 × 20 × 10 cm',
           'Substrate Matrix': '100% Coir Pith or 70:30 Pith + Crush Chips',
           'Electrical Conductivity (EC)': '< 0.5 mS/cm (Washed / Calcium Buffered)',
           'pH Range': '5.5 – 6.5',
-          'Outer Sleeve': 'Black/White Co-extruded UV-stabilised polyethylene (3-year life)',
-          'Custom Customisation': 'Pre-cut plant holes, dripper holes & drainage slits',
+          'Format': 'Compressed naked slab (for troughs, gutters or custom poly sleeves)',
+          'Compression Ratio': '5:1',
         },
       },
     ],
     short:
-      'Ready-to-use coir grow slabs for soilless cultivation of tomatoes, cucumbers, peppers and berries in commercial greenhouses.',
+      'Compressed coir naked slabs for soilless cultivation of tomatoes, cucumbers, peppers and berries in commercial greenhouse troughs and hydroponic channels.',
     image: '/images/growbags.jpg',
     specs: {
       'Standard Dimensions': '100 × 15 × 10 cm / 100 × 20 × 10 cm',
       'Electrical Conductivity (EC)': '< 0.5 mS/cm (Washed / Buffered)',
       'pH Range': '5.5 – 6.5',
-      'Outer Sleeve': 'UV-stabilised black/white co-extruded film',
+      'Format': 'Compressed Naked Coir Slab',
     },
     order: 3,
     isActive: true,
@@ -167,7 +167,7 @@ export const CATALOGUE = [
     name: 'Open Top Grow Bags',
     slug: 'open-top-grow-bags',
     categories: ['Grow Bags', 'Hydroponics'],
-    variants: ['Open Top Grow Bag', 'Cocopeat Grow Bags', 'Slab Type'],
+    variants: ['Open Top Grow Bag'],
     variantDetails: [
       {
         name: 'Open Top Grow Bag',
@@ -184,40 +184,12 @@ export const CATALOGUE = [
           'Target Crops': 'Blueberries, Raspberries, Blackberries, Cannabis & Ginger',
         },
       },
-      {
-        name: 'Cocopeat Grow Bags',
-        badge: 'Greenhouse Multi-Crop Bag',
-        short:
-          'High-yield cocopeat grow bags formulated with triple-washed low-EC coir pith for uniform water distribution, rapid root colonisation and high fruit set.',
-        image: '/images/seedling.jpg',
-        specs: {
-          'Standard Sizes': '100 × 18 × 10 cm / 100 × 20 × 12 cm',
-          'Substrate Matrix': '80% Washed Coir Pith + 20% Crush Chips',
-          'Electrical Conductivity (EC)': '< 0.5 mS/cm',
-          'pH Range': '5.5 – 6.5',
-          'Target Crops': 'Tomatoes, Bell Peppers, Aubergines & Cucumbers',
-        },
-      },
-      {
-        name: 'Slab Type',
-        badge: 'Horizontal Channel Grow Slab',
-        short:
-          'Horizontal trough and gutter-ready slab type grow bags designed for high-density hydroponic rows with precision drainage control.',
-        image: '/images/block.jpg',
-        specs: {
-          'Dimensions': '100 × 15 × 10 cm / 100 × 20 × 10 cm',
-          'Compression': '5:1 compressed dry slab for maximum container loading',
-          'Electrical Conductivity (EC)': '< 0.5 mS/cm',
-          'pH Range': '5.5 – 6.5',
-          'Target Crops': 'Strawberries, Leafy Greens & Cut Flowers',
-        },
-      },
     ],
     short:
-      'Cocopeat-filled grow bags in open top, multi-crop and slab type formats for commercial greenhouse and open-field berry and vegetable growers.',
+      'Self-standing UV-stabilised open top grow bags pre-filled with washed coco peat and husk chips for commercial greenhouse and open-field berry and vegetable growers.',
     image: '/images/growbags.jpg',
     specs: {
-      'Available Formats': 'Open Top Grow Bag / Cocopeat Grow Bags / Slab Type',
+      'Expanded Volume': '10 L / 15 L / 20 L / 25 L / 30 L / 40 L',
       'Electrical Conductivity (EC)': '< 0.5 mS/cm (Washed)',
       'pH Range': '5.5 – 6.5',
     },
@@ -228,7 +200,7 @@ export const CATALOGUE = [
     name: 'Coconut Fiber',
     slug: 'coconut-fiber',
     categories: ['Coir Fibre'],
-    variants: ['Natural Brown Coir Fiber', 'White Bristle & Mattress Fiber'],
+    variants: ['Natural Brown Coir Fiber'],
     variantDetails: [
       {
         name: 'Natural Brown Coir Fiber',
@@ -242,19 +214,6 @@ export const CATALOGUE = [
           'Impurities / Pith Dust': '< 3%',
           'Bale Weight': '110 – 125 kg hydraulically strapped bales',
           'Container Load': '20 – 22 MT per 40 ft HC container',
-        },
-      },
-      {
-        name: 'White Bristle & Mattress Fiber',
-        badge: 'Horticultural & Industrial Grade',
-        short:
-          'Resilient, rot-resistant coconut fibre suited for coir twine, geo-rolls, mulching mats, pot toppers and soil aeration mixes.',
-        image: '/images/hero.jpg',
-        specs: {
-          'Fibre Length': '8 – 20 cm',
-          'Moisture Content': '< 15%',
-          'Packing': 'Compressed hydraulic bales with rust-free strapping',
-          'Applications': 'Mulch mats, Orchid totem poles, Geotextiles & Curled Rope',
         },
       },
     ],

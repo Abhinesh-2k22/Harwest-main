@@ -49,8 +49,8 @@ const productSchema = new mongoose.Schema(
 
 const infrastructureSchema = new mongoose.Schema(
   {
-    title: { type: String, required: true, trim: true },
-    category: { type: String, default: 'Processing Area', trim: true },
+    title: { type: String, default: '', trim: true },
+    category: { type: String, default: '', trim: true },
     description: { type: String, default: '', trim: true },
     mediaUrl: { type: String, required: true, trim: true },
     mediaType: { type: String, enum: ['image', 'video'], default: 'image' },
@@ -116,6 +116,17 @@ const enquirySchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+const siteAnalyticsSchema = new mongoose.Schema(
+  {
+    key: { type: String, required: true, unique: true, default: 'global' },
+    totalVisits: { type: Number, default: 0 },
+    dailyVisits: { type: Map, of: Number, default: {} },
+    pageClicks: { type: Map, of: Number, default: {} },
+    countryClicks: { type: Map, of: Number, default: {} },
+  },
+  { timestamps: true }
+);
+
 export const Admin = mongoose.model('Admin', adminSchema);
 export const Media = mongoose.model('Media', mediaSchema);
 export const Product = mongoose.model('Product', productSchema);
@@ -124,3 +135,4 @@ export const Blog = mongoose.model('Blog', blogSchema);
 export const Faq = mongoose.model('Faq', faqSchema);
 export const Enquiry = mongoose.model('Enquiry', enquirySchema);
 export const PendingDeletion = mongoose.model('PendingDeletion', pendingDeletionSchema);
+export const SiteAnalytics = mongoose.model('SiteAnalytics', siteAnalyticsSchema);

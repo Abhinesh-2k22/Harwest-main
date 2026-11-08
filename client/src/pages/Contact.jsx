@@ -52,32 +52,44 @@ function ProductSelect({ value, onChange, groups }) {
       {open && (
         <div
           role="listbox"
-          className="absolute z-30 mt-2 max-h-72 w-full overflow-y-auto rounded-2xl border border-leaf-200 bg-white p-2 shadow-2xl shadow-leaf-950/15"
+          className="absolute z-30 mt-2 max-h-80 w-full overflow-y-auto rounded-2xl border border-leaf-300 bg-white p-2.5 shadow-2xl shadow-leaf-950/20 space-y-2.5"
         >
           {groups.map((g) => (
-            <div key={g.label} className="py-1">
-              <p className="px-3 pb-1 pt-1.5 text-[10px] font-bold uppercase tracking-widest text-leaf-700">{g.label}</p>
-              {g.options.map((o) => {
-                const on = o === value;
-                return (
-                  <button
-                    key={`${g.label}-${o}`}
-                    type="button"
-                    role="option"
-                    aria-selected={on}
-                    onClick={() => {
-                      onChange(o);
-                      setOpen(false);
-                    }}
-                    className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition ${
-                      on ? 'bg-leaf-600 font-semibold text-white' : 'text-shell-800 hover:bg-leaf-50'
-                    }`}
-                  >
-                    <span>{o}</span>
-                    {on && <Check size={15} />}
-                  </button>
-                );
-              })}
+            <div
+              key={g.label}
+              className="overflow-hidden rounded-xl border border-leaf-200/90 bg-shell-50/50 shadow-2xs"
+            >
+              <div className="flex items-center gap-2 border-b border-leaf-200/80 bg-gradient-to-r from-leaf-900 via-leaf-800 to-leaf-700 px-3.5 py-2">
+                <span className="h-2 w-2 shrink-0 rounded-full bg-coconut-300" />
+                <p className="font-head text-[11px] font-bold uppercase tracking-wider text-white">
+                  {g.label}
+                </p>
+              </div>
+              <div className="p-1.5 space-y-1 bg-white">
+                {g.options.map((o) => {
+                  const on = o === value;
+                  return (
+                    <button
+                      key={`${g.label}-${o}`}
+                      type="button"
+                      role="option"
+                      aria-selected={on}
+                      onClick={() => {
+                        onChange(o);
+                        setOpen(false);
+                      }}
+                      className={`flex w-full items-center justify-between rounded-lg px-3 py-2 text-left text-sm transition ${
+                        on
+                          ? 'bg-leaf-600 font-semibold text-white shadow-xs'
+                          : 'font-medium text-shell-800 hover:bg-leaf-50 hover:text-leaf-900'
+                      }`}
+                    >
+                      <span>{o}</span>
+                      {on && <Check size={15} />}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
           ))}
         </div>

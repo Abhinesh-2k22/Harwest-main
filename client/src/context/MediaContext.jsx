@@ -36,6 +36,24 @@ export function MediaProvider({ children }) {
 
   useEffect(() => { refresh(); }, [refresh]);
 
+  // Keep the browser tab favicon in sync with the active Cloudinary branding.logo
+  useEffect(() => {
+    const rawLogo = overrides['branding.logo'] || ASSET_DEFAULTS['branding.logo']?.url;
+    if (!rawLogo) return;
+    const faviconUrl = optimizeCloudinaryUrl(rawLogo);
+    const icons = document.querySelectorAll("link[rel*='icon']");
+    if (icons.length > 0) {
+      icons.forEach((el) => {
+        el.href = faviconUrl;
+      });
+    } else {
+      const link = document.createElement('link');
+      link.rel = 'icon';
+      link.href = faviconUrl;
+      document.head.appendChild(link);
+    }
+  }, [overrides]);
+
   const value = useMemo(
     () => ({
       overrides,

@@ -3,35 +3,24 @@ import { Link, NavLink, Outlet, useLocation } from 'react-router-dom';
 import { Menu, X, Leaf, Phone, Mail, MapPin, MessageCircle, Linkedin, Instagram, Facebook, Sparkles } from 'lucide-react';
 import { NAV, SITE } from '../config/siteContent';
 import { useAsset } from '../context/MediaContext';
+import { api } from '../lib/api';
 
 function Logo() {
   const logo = useAsset('branding.logo');
   return (
-    <div className="group flex items-center gap-3">
+    <div className="group flex items-center">
       {logo ? (
-        <div className="relative flex items-center justify-center overflow-hidden rounded-xl bg-white/95 p-1.5 shadow-md shadow-black/20 ring-1 ring-white/30 transition-transform duration-500 group-hover:scale-105">
-          <img
-            src={logo}
-            alt={SITE.name}
-            className="h-10 w-auto object-contain transition-transform duration-700 group-hover:rotate-1 animate-pulse-slow"
-          />
-          {/* Subtle micro sheen animation across logo */}
-          <span className="pointer-events-none absolute inset-0 -translate-x-full bg-gradient-to-r from-transparent via-white/50 to-transparent transition-transform duration-1000 group-hover:translate-x-full" />
-        </div>
+        <img
+          src={logo}
+          alt={SITE.name}
+          className="h-11 sm:h-14 w-auto max-w-[200px] sm:max-w-[260px] object-contain transition-transform duration-300 group-hover:scale-105"
+        />
       ) : (
         <span className="flex items-center gap-2 font-head text-2xl font-bold tracking-tight text-white">
           <Leaf className="animate-sway text-leaf-300" size={26} strokeWidth={2.2} />
           Har<span className="text-coconut-300 font-bold">West</span>
         </span>
       )}
-      <div className="hidden flex-col sm:flex">
-        <span className="font-head text-lg font-bold leading-none tracking-tight text-white group-hover:text-leaf-200 transition">
-          Har<span className="text-coconut-400 font-bold">West</span>
-        </span>
-        <span className="text-[10px] uppercase tracking-widest text-coconut-200/80 font-medium">
-          Coir Substrates
-        </span>
-      </div>
     </div>
   );
 }
@@ -367,6 +356,13 @@ function Footer() {
 }
 
 export default function Layout() {
+  const { pathname } = useLocation();
+
+  // Record website visit & page click for Admin Analytics
+  useEffect(() => {
+    api.recordVisit(pathname).catch(() => {});
+  }, [pathname]);
+
   return (
     <div className="flex min-h-screen flex-col bg-shell-50 text-shell-900 selection:bg-leaf-800 selection:text-white">
       <Navbar />

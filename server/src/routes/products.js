@@ -36,6 +36,26 @@ async function ensureProductsSynced() {
         changed = true;
       }
     }
+    if (template.slug === 'coir-grow-slabs' && doc.name === 'Coir Grow Slabs') {
+      doc.name = template.name;
+      doc.variants = template.variants;
+      doc.variantDetails = template.variantDetails;
+      doc.short = template.short;
+      doc.specs = template.specs;
+      changed = true;
+    }
+    if (template.slug === 'open-top-grow-bags' && Array.isArray(doc.variants) && doc.variants.length > 1) {
+      doc.variants = template.variants;
+      doc.variantDetails = template.variantDetails;
+      doc.short = template.short;
+      doc.specs = template.specs;
+      changed = true;
+    }
+    if (template.slug === 'coconut-fiber' && Array.isArray(doc.variants) && doc.variants.some((v) => /white\s*bristle/i.test(v))) {
+      doc.variants = template.variants;
+      doc.variantDetails = template.variantDetails;
+      changed = true;
+    }
     if (!Array.isArray(doc.variantDetails) || doc.variantDetails.length === 0) {
       doc.variantDetails = template.variantDetails;
       changed = true;

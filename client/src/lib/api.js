@@ -26,6 +26,8 @@ function setToken(token) {
 function clearProductsCache() {
   try {
     localStorage.removeItem('hw_products_cache');
+    localStorage.removeItem('hw_products_cache_v2');
+    localStorage.removeItem('hw_products_cache_v3');
   } catch {}
 }
 
@@ -50,6 +52,17 @@ async function request(path, { method = 'GET', body, form } = {}) {
 export const api = {
   // --- Health / Status ---
   health: () => request('/health'),
+
+  // --- Website Visits & Analytics ---
+  recordVisit: (path = '/') => {
+    let tz = '';
+    try {
+      tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
+    } catch {}
+    return request('/analytics/visit', { method: 'POST', body: { path, tz } });
+  },
+  getAnalyticsSummary: () => request('/analytics/summary'),
+  resetAnalytics: () => request('/analytics/reset', { method: 'DELETE' }),
 
   // --- Auth ---
   login: async (email, password) => {

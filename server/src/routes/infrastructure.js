@@ -62,18 +62,15 @@ router.get('/all', requireAdmin, async (_req, res) => {
 // ADMIN: Create new infrastructure item
 router.post('/', requireAdmin, csrfGuard, async (req, res) => {
   try {
-    const { title, category, description, mediaUrl, mediaType, order, isActive } = req.body || {};
-    if (!title || !String(title).trim()) {
-      return res.status(400).json({ error: 'Title is required.' });
-    }
+    const { title, description, mediaUrl, mediaType, order, isActive } = req.body || {};
     if (!mediaUrl || !String(mediaUrl).trim()) {
       return res.status(400).json({ error: 'Image or video URL is required.' });
     }
 
     const cleanUrl = optimizeCloudinaryUrl(String(mediaUrl).trim());
     const item = await Infrastructure.create({
-      title: String(title).trim().slice(0, 160),
-      category: String(category || 'Processing Area').trim().slice(0, 80),
+      title: String(title || '').trim().slice(0, 160),
+      category: '',
       description: String(description || '').trim().slice(0, 1000),
       mediaUrl: cleanUrl,
       mediaType: detectMediaType(cleanUrl, mediaType),
@@ -103,14 +100,12 @@ router.put('/:id', requireAdmin, csrfGuard, async (req, res) => {
     const previous = await Infrastructure.findById(id).lean();
     if (!previous) return res.status(404).json({ error: 'Item not found' });
 
-    const { title, category, description, mediaUrl, mediaType, order, isActive } = req.body || {};
+    const { title, description, mediaUrl, mediaType, order, isActive } = req.body || {};
     const update = {};
     if (title !== undefined) {
-      const t = String(title || '').trim();
-      if (!t) return res.status(400).json({ error: 'Title cannot be empty.' });
-      update.title = t.slice(0, 160);
+      update.title = String(title || '').trim().slice(0, 160);
     }
-    if (category !== undefined) update.category = String(category || '').trim().slice(0, 80);
+    update.category = '';
     if (description !== undefined) update.description = String(description || '').trim().slice(0, 1000);
     if (mediaUrl !== undefined) {
       const cleanUrl = optimizeCloudinaryUrl(String(mediaUrl || '').trim());

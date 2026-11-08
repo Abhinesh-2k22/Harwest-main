@@ -32,4 +32,12 @@ export const config = {
     apiSecret: process.env.CLOUDINARY_API_SECRET && !process.env.CLOUDINARY_API_SECRET.startsWith('PASTE_') ? process.env.CLOUDINARY_API_SECRET : '',
     url: process.env.CLOUDINARY_URL && !process.env.CLOUDINARY_URL.includes('<') && !process.env.CLOUDINARY_URL.startsWith('PASTE_') ? process.env.CLOUDINARY_URL : '',
   },
+  googleSheetsWebhookUrl:
+    process.env.GOOGLE_SHEETS_WEBHOOK_URL && !process.env.GOOGLE_SHEETS_WEBHOOK_URL.startsWith('PASTE_')
+      ? process.env.GOOGLE_SHEETS_WEBHOOK_URL.trim()
+      : '',
+  notifyEmail:
+    process.env.NOTIFY_EMAIL && !process.env.NOTIFY_EMAIL.startsWith('PASTE_')
+      ? process.env.NOTIFY_EMAIL.trim()
+      : 'harwestcoir@gmail.com',
 };

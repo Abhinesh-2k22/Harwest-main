@@ -28,6 +28,10 @@ import {
   AlertTriangle,
   Building2,
   Film,
+  BarChart3,
+  MousePointerClick,
+  TrendingUp,
+  Globe2,
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { ASSET_DEFAULTS, ASSET_GROUPS } from '../config/assets';
@@ -36,7 +40,6 @@ import {
   FAQ as FALLBACK_FAQS,
   DEFAULT_BLOGS,
   PRODUCT_CATEGORIES,
-  INFRASTRUCTURE_CATEGORIES,
   DEFAULT_INFRASTRUCTURE,
 } from '../config/siteContent';
 import GrowLoader from '../components/GrowLoader';
@@ -68,10 +71,295 @@ function formatDateTime(isoString) {
 }
 
 // -------------------------------------------------------------
+// WEBSITE VISITS & ENQUIRY ANALYTICS VISUALIZATION
+// -------------------------------------------------------------
+function AnalyticsOverview({ analytics, onReset, resetting }) {
+  if (!analytics) return null;
+
+  const {
+    totalVisits = 0,
+    todayVisits = 0,
+    last7DaysVisits = 0,
+    totalEnquiries = 0,
+    domesticCount = 0,
+    internationalCount = 0,
+    dailySeries = [],
+    pageClicks = [],
+    countryClicks = [],
+    productBreakdown = [],
+  } = analytics;
+
+  const maxDailyVisits = Math.max(1, ...dailySeries.map((d) => Math.max(d.visits || 0, d.enquiries || 0)));
+  const maxPageClicks = Math.max(1, ...pageClicks.map((p) => p.clicks || 0));
+  const maxCountryClicks = Math.max(1, ...countryClicks.map((c) => c.clicks || 0));
+  const maxProductCount = Math.max(1, ...productBreakdown.map((p) => p.count || 0));
+  const topCountry = countryClicks[0] || null;
+
+  return (
+    <div className="space-y-5 rounded-3xl border border-leaf-200/80 bg-gradient-to-br from-white via-leaf-50/30 to-white p-6 shadow-sm">
+      <div className="flex flex-wrap items-center justify-between gap-3 border-b border-shell-200/80 pb-4">
+        <div className="flex items-center gap-2.5">
+          <div className="grid h-9 w-9 place-items-center rounded-xl bg-leaf-700 text-white shadow-sm">
+            <BarChart3 size={18} />
+          </div>
+          <div>
+            <h3 className="font-head text-lg font-bold text-shell-900">
+              Website Traffic &amp; Enquiry Analytics
+            </h3>
+            <p className="text-xs text-shell-500">
+              100% real-time visitor clicks, country origin &amp; enquiry insights (IST)
+            </p>
+          </div>
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2.5">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-leaf-100 border border-leaf-300 px-3 py-1 text-xs font-bold text-leaf-900">
+            <span className="h-2 w-2 rounded-full bg-leaf-600 animate-pulse" />
+            Live Tracking Active
+          </span>
+          {onReset && (
+            <button
+              type="button"
+              onClick={onReset}
+              disabled={resetting}
+              className="inline-flex items-center gap-1.5 rounded-xl border border-red-200 bg-red-50/80 px-3 py-1.5 text-xs font-bold text-red-700 transition hover:bg-red-100 disabled:opacity-50"
+              title="Reset all website visit and click counters to 0"
+            >
+              <RotateCcw size={13} className={resetting ? 'animate-spin' : ''} />
+              {resetting ? 'Resetting...' : 'Reset Click Data'}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* Top 3 KPI Cards */}
+      <div className="grid gap-4 sm:grid-cols-3">
+        <div className="rounded-2xl border border-shell-200 bg-white p-4 shadow-2xs">
+          <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-shell-500">
+            <span>Total Website Visits</span>
+            <MousePointerClick size={15} className="text-leaf-600" />
+          </div>
+          <p className="mt-2 font-head text-3xl font-extrabold text-shell-900">
+            {totalVisits.toLocaleString('en-IN')}
+          </p>
+          <p className="mt-1 text-xs font-medium text-leaf-700">
+            +{todayVisits} today · {last7DaysVisits} in last 7 days
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-shell-200 bg-white p-4 shadow-2xs">
+          <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-shell-500">
+            <span>Total Enquiries</span>
+            <Inbox size={15} className="text-leaf-600" />
+          </div>
+          <p className="mt-2 font-head text-3xl font-extrabold text-shell-900">
+            {totalEnquiries.toLocaleString('en-IN')}
+          </p>
+          <p className="mt-1 text-xs text-shell-500">
+            🌍 {internationalCount} Intl · 🇮🇳 {domesticCount} Domestic
+          </p>
+        </div>
+
+        <div className="rounded-2xl border border-shell-200 bg-white p-4 shadow-2xs">
+          <div className="flex items-center justify-between text-xs font-bold uppercase tracking-wider text-shell-500">
+            <span>Top Visiting Country</span>
+            <Globe2 size={15} className="text-leaf-600" />
+          </div>
+          <p className="mt-2 font-head text-2xl sm:text-3xl font-extrabold text-leaf-900 truncate">
+            {topCountry ? topCountry.country : 'No clicks yet'}
+          </p>
+          <p className="mt-1 text-xs text-shell-500">
+            {topCountry
+              ? `${topCountry.clicks} clicks · ${countryClicks.length} ${
+                  countryClicks.length === 1 ? 'country' : 'countries'
+                } active`
+              : 'Waiting for visitor clicks'}
+          </p>
+        </div>
+      </div>
+
+      {/* Charts Grid */}
+      <div className="grid gap-5 lg:grid-cols-12">
+        {/* Left Column: 14-Day Visits vs Enquiries + Clicks by Country */}
+        <div className="lg:col-span-7 space-y-5">
+          <div className="rounded-2xl border border-shell-200 bg-white p-5">
+            <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+              <div>
+                <h4 className="font-head text-sm font-bold text-shell-900">
+                  Last 14 Days — Website Visits vs Enquiries
+                </h4>
+                <p className="text-[11px] text-shell-500">
+                  Daily visitor traffic compared with submitted customer enquiries
+                </p>
+              </div>
+              <div className="flex items-center gap-4 text-[11px] font-bold">
+                <span className="flex items-center gap-1.5 text-leaf-800">
+                  <span className="h-2.5 w-2.5 rounded-sm bg-leaf-600" /> Visits
+                </span>
+                <span className="flex items-center gap-1.5 text-amber-800">
+                  <span className="h-2.5 w-2.5 rounded-sm bg-amber-500" /> Enquiries
+                </span>
+              </div>
+            </div>
+
+            <div className="flex h-44 items-end gap-1.5 sm:gap-2 pt-4 border-b border-shell-200 pb-2">
+              {dailySeries.map((day) => {
+                const visitHeight = Math.max(
+                  day.visits > 0 ? 10 : 3,
+                  Math.round((day.visits / maxDailyVisits) * 100)
+                );
+                const enqHeight = Math.max(
+                  day.enquiries > 0 ? 10 : 0,
+                  Math.round((day.enquiries / maxDailyVisits) * 100)
+                );
+                return (
+                  <div
+                    key={day.date}
+                    className="group relative flex flex-1 flex-col items-center h-full justify-end"
+                  >
+                    <div className="pointer-events-none absolute -top-8 z-10 hidden whitespace-nowrap rounded-lg bg-shell-900 px-2 py-1 text-[10px] font-bold text-white shadow group-hover:block">
+                      {day.label}: {day.visits} visits, {day.enquiries} enquiries
+                    </div>
+                    <div className="flex w-full items-end justify-center gap-0.5 h-full">
+                      <div
+                        className="w-1/2 max-w-[14px] rounded-t-md bg-leaf-600 transition-all duration-500 group-hover:bg-leaf-500"
+                        style={{ height: `${visitHeight}%` }}
+                      />
+                      {day.enquiries > 0 && (
+                        <div
+                          className="w-1/2 max-w-[14px] rounded-t-md bg-amber-500 transition-all duration-500"
+                          style={{ height: `${enqHeight}%` }}
+                        />
+                      )}
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+            <div className="mt-2 flex justify-between text-[10px] font-medium text-shell-500">
+              {dailySeries.filter((_, i) => i % 2 === 0 || i === dailySeries.length - 1).map((d) => (
+                <span key={d.date}>{d.label}</span>
+              ))}
+            </div>
+          </div>
+
+          {/* Website Clicks by Country */}
+          <div className="rounded-2xl border border-shell-200 bg-white p-5">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <h4 className="font-head text-sm font-bold text-shell-900 flex items-center gap-2">
+                  <Globe2 size={15} className="text-leaf-700" /> Website Clicks by Country
+                </h4>
+                <p className="text-[11px] text-shell-500">
+                  Real geographic origin of website visitors
+                </p>
+              </div>
+              <span className="text-[11px] font-bold text-leaf-800 bg-leaf-50 border border-leaf-200 px-2.5 py-0.5 rounded-full">
+                {countryClicks.length} {countryClicks.length === 1 ? 'Country' : 'Countries'}
+              </span>
+            </div>
+
+            {countryClicks.length === 0 ? (
+              <div className="rounded-xl border border-dashed border-shell-200 bg-shell-50/50 py-6 text-center text-xs text-shell-500">
+                No country click data recorded yet. Open any public page on the website to record live visits.
+              </div>
+            ) : (
+              <div className="grid gap-3 sm:grid-cols-2">
+                {countryClicks.slice(0, 8).map((c) => {
+                  const pct = Math.round((c.clicks / maxCountryClicks) * 100);
+                  const sharePct =
+                    totalVisits > 0 ? Math.round((c.clicks / totalVisits) * 100) : 100;
+                  return (
+                    <div
+                      key={c.country}
+                      className="rounded-xl border border-shell-100 bg-shell-50/50 p-3"
+                    >
+                      <div className="flex items-center justify-between text-xs mb-1.5 gap-2">
+                        <span className="font-bold text-shell-900 truncate">{c.country}</span>
+                        <span className="shrink-0 font-bold text-leaf-800">
+                          {c.clicks} {c.clicks === 1 ? 'click' : 'clicks'} ({sharePct}%)
+                        </span>
+                      </div>
+                      <div className="h-2 w-full overflow-hidden rounded-full bg-shell-200/80">
+                        <div
+                          className="h-full rounded-full bg-gradient-to-r from-leaf-700 to-emerald-500 transition-all duration-500"
+                          style={{ width: `${Math.max(8, pct)}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right Column: Page Clicks + Product Demand */}
+        <div className="lg:col-span-5 grid gap-4 content-start">
+          <div className="rounded-2xl border border-shell-200 bg-white p-4">
+            <h4 className="font-head text-xs font-bold uppercase tracking-wider text-shell-700 mb-3">
+              Page Clicks Breakdown
+            </h4>
+            <div className="space-y-2.5">
+              {pageClicks.map((p) => {
+                const pct = Math.round((p.clicks / maxPageClicks) * 100);
+                return (
+                  <div key={p.page} className="text-xs">
+                    <div className="flex justify-between font-semibold text-shell-800 mb-1">
+                      <span>{p.page}</span>
+                      <span className="text-leaf-800 font-bold">{p.clicks} clicks</span>
+                    </div>
+                    <div className="h-2 w-full overflow-hidden rounded-full bg-shell-100">
+                      <div
+                        className="h-full rounded-full bg-leaf-600 transition-all duration-500"
+                        style={{ width: `${Math.max(p.clicks > 0 ? 6 : 0, pct)}%` }}
+                      />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+
+          {productBreakdown.length > 0 && (
+            <div className="rounded-2xl border border-shell-200 bg-white p-4">
+              <h4 className="font-head text-xs font-bold uppercase tracking-wider text-shell-700 mb-3">
+                Most Enquired Products
+              </h4>
+              <div className="space-y-2">
+                {productBreakdown.slice(0, 4).map((item) => {
+                  const pct = Math.round((item.count / maxProductCount) * 100);
+                  return (
+                    <div key={item.product} className="text-xs">
+                      <div className="flex justify-between font-semibold text-shell-800 mb-1 gap-2">
+                        <span className="truncate">{item.product}</span>
+                        <span className="shrink-0 text-amber-800 font-bold">{item.count} leads</span>
+                      </div>
+                      <div className="h-2 w-full overflow-hidden rounded-full bg-shell-100">
+                        <div
+                          className="h-full rounded-full bg-amber-500 transition-all duration-500"
+                          style={{ width: `${Math.max(8, pct)}%` }}
+                        />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// -------------------------------------------------------------
 // TAB 1: CUSTOMER ENQUIRIES
 // -------------------------------------------------------------
 function EnquiriesTab() {
   const [enquiries, setEnquiries] = useState([]);
+  const [analytics, setAnalytics] = useState(null);
+  const [resettingClicks, setResettingClicks] = useState(false);
   const [filter, setFilter] = useState('all');
   const [loading, setLoading] = useState(true);
   const [msg, setMsg] = useState('');
@@ -80,8 +368,12 @@ function EnquiriesTab() {
     setLoading(true);
     setMsg('');
     try {
-      const data = await api.getEnquiries(filter);
-      setEnquiries(Array.isArray(data) ? data : []);
+      const [enqData, statsData] = await Promise.all([
+        api.getEnquiries(filter),
+        api.getAnalyticsSummary().catch(() => null),
+      ]);
+      setEnquiries(Array.isArray(enqData) ? enqData : []);
+      if (statsData) setAnalytics(statsData);
     } catch (e) {
       setMsg(e.message || 'Could not fetch enquiries. Ensure MongoDB is connected.');
     }
@@ -91,6 +383,25 @@ function EnquiriesTab() {
   useEffect(() => {
     load();
   }, [load]);
+
+  const handleResetClicks = async () => {
+    if (
+      !window.confirm(
+        'Reset all website visit and click counters (Total Visits, Daily Visits, Page Clicks, and Country Clicks) back to 0? Your customer enquiries will NOT be deleted.'
+      )
+    ) {
+      return;
+    }
+    setResettingClicks(true);
+    try {
+      await api.resetAnalytics();
+      const freshStats = await api.getAnalyticsSummary().catch(() => null);
+      if (freshStats) setAnalytics(freshStats);
+    } catch (e) {
+      alert(e.message || 'Failed to reset click data');
+    }
+    setResettingClicks(false);
+  };
 
   const updateStatus = async (id, status) => {
     try {
@@ -115,6 +426,8 @@ function EnquiriesTab() {
 
   return (
     <div className="space-y-6">
+      <AnalyticsOverview analytics={analytics} onReset={handleResetClicks} resetting={resettingClicks} />
+
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-bold text-shell-900">Customer Enquiries & Export Leads</h2>
@@ -885,7 +1198,7 @@ function ProductsTab() {
 }
 
 // -------------------------------------------------------------
-// TAB 2B: INFRASTRUCTURE MANAGER (CRUD — PHOTOS & VIDEOS)
+// TAB 2B: INFRASTRUCTURE MANAGER (GALLERY OF PHOTOS & VIDEOS)
 // -------------------------------------------------------------
 function InfrastructureTab() {
   const [items, setItems] = useState([]);
@@ -899,7 +1212,6 @@ function InfrastructureTab() {
 
   const EMPTY_FORM = {
     title: '',
-    category: INFRASTRUCTURE_CATEGORIES[0] || 'Washing & Buffering',
     description: '',
     mediaUrl: '',
     mediaType: 'image',
@@ -942,7 +1254,6 @@ function InfrastructureTab() {
     setEditing(item);
     setForm({
       title: item.title || '',
-      category: item.category || INFRASTRUCTURE_CATEGORIES[0],
       description: item.description || '',
       mediaUrl: item.mediaUrl || '',
       mediaType: item.mediaType === 'video' ? 'video' : 'image',
@@ -983,7 +1294,7 @@ function InfrastructureTab() {
 
   const remove = async (id) => {
     if (!id) return;
-    if (!window.confirm('Delete this infrastructure photo/video item?')) return;
+    if (!window.confirm('Delete this photo/video from the Infrastructure gallery?')) return;
     try {
       await api.deleteInfrastructure(id);
       await load();
@@ -998,6 +1309,7 @@ function InfrastructureTab() {
     try {
       const payload = {
         ...form,
+        category: '',
         order: Number(form.order) || 1,
       };
       if (editing && editing._id) {
@@ -1008,7 +1320,7 @@ function InfrastructureTab() {
       setModalOpen(false);
       await load();
     } catch (er) {
-      alert('Failed to save infrastructure item: ' + er.message);
+      alert('Failed to save item: ' + er.message);
     }
     setBusy(false);
   };
@@ -1017,9 +1329,9 @@ function InfrastructureTab() {
     <div className="space-y-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-shell-900">Infrastructure &amp; Facility Gallery</h2>
+          <h2 className="text-2xl font-bold text-shell-900">Infrastructure Photo &amp; Video Gallery</h2>
           <p className="text-sm text-shell-600">
-            Add, edit, or upload real photos and videos of your Pollachi washing beds, drying yards, screening units, and container loading.
+            Add, edit, or delete photos and videos displayed in your Infrastructure gallery.
           </p>
         </div>
         <button
@@ -1038,7 +1350,7 @@ function InfrastructureTab() {
       )}
 
       {loading ? (
-        <div className="py-12 text-center text-sm text-shell-500">Loading infrastructure items...</div>
+        <div className="py-12 text-center text-sm text-shell-500">Loading infrastructure gallery...</div>
       ) : (
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {items.map((item, idx) => {
@@ -1053,7 +1365,7 @@ function InfrastructureTab() {
                 className="flex flex-col justify-between rounded-2xl border border-shell-200 bg-white p-5 shadow-sm transition hover:shadow-md"
               >
                 <div>
-                  <div className="relative h-44 w-full overflow-hidden rounded-xl bg-leaf-950">
+                  <div className="relative h-48 w-full overflow-hidden rounded-xl bg-leaf-950">
                     {isVideo ? (
                       <video
                         src={item.mediaUrl}
@@ -1064,7 +1376,7 @@ function InfrastructureTab() {
                     ) : (
                       <img
                         src={item.mediaUrl || '/images/factory.jpg'}
-                        alt={item.title}
+                        alt={item.title || `Gallery item ${idx + 1}`}
                         className={`h-full w-full object-cover ${item.isActive === false ? 'opacity-50 grayscale' : ''}`}
                         onError={(e) => {
                           e.currentTarget.src = '/images/factory.jpg';
@@ -1075,18 +1387,16 @@ function InfrastructureTab() {
                       {isVideo ? <Film size={11} /> : <ImageIcon size={11} />}
                       {isVideo ? 'Video' : 'Photo'}
                     </span>
-                  </div>
-
-                  <div className="mt-4 flex items-center justify-between gap-2">
-                    <span className="rounded-full bg-leaf-50 border border-leaf-200 px-2.5 py-0.5 text-[10px] font-bold text-leaf-800">
-                      {item.category || 'Facility'}
+                    <span className="absolute right-2.5 top-2.5 rounded-full bg-black/60 px-2.5 py-0.5 text-[10px] font-bold text-white">
+                      #{item.order ?? idx + 1}
                     </span>
-                    <span className="text-xs text-shell-400">Order #{item.order ?? idx + 1}</span>
                   </div>
 
-                  <h3 className="mt-2 text-lg font-bold text-shell-900">{item.title}</h3>
+                  {item.title && (
+                    <h3 className="mt-3 text-base font-bold text-shell-900">{item.title}</h3>
+                  )}
                   {item.description && (
-                    <p className="mt-1.5 text-xs text-shell-600 line-clamp-3 leading-relaxed">
+                    <p className="mt-1 text-xs text-shell-600 line-clamp-3 leading-relaxed">
                       {item.description}
                     </p>
                   )}
@@ -1133,7 +1443,7 @@ function InfrastructureTab() {
           <div className="w-full max-w-xl max-h-[90vh] overflow-y-auto rounded-3xl bg-white p-7 shadow-2xl">
             <div className="flex items-center justify-between border-b border-shell-100 pb-4">
               <h3 className="font-head text-xl font-bold text-shell-900">
-                {editing ? `Edit: ${editing.title}` : 'Add Facility Photo or Video'}
+                {editing ? 'Edit Gallery Item' : 'Add Photo or Video to Gallery'}
               </h3>
               <button
                 onClick={() => setModalOpen(false)}
@@ -1144,52 +1454,6 @@ function InfrastructureTab() {
             </div>
 
             <form onSubmit={submit} className="mt-5 space-y-4">
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-shell-700">
-                  Title *
-                </label>
-                <input
-                  required
-                  className={inputCls}
-                  placeholder="e.g. Own Freshwater Washing & Buffering Bed"
-                  value={form.title}
-                  onChange={(e) => setForm({ ...form, title: e.target.value })}
-                />
-              </div>
-
-              <div className="grid gap-3 sm:grid-cols-2">
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-shell-700">
-                    Facility Section / Category
-                  </label>
-                  <select
-                    className={inputCls}
-                    value={form.category}
-                    onChange={(e) => setForm({ ...form, category: e.target.value })}
-                  >
-                    {INFRASTRUCTURE_CATEGORIES.map((c) => (
-                      <option key={c} value={c}>
-                        {c}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-wider text-shell-700">
-                    Media Type
-                  </label>
-                  <select
-                    className={inputCls}
-                    value={form.mediaType}
-                    onChange={(e) => setForm({ ...form, mediaType: e.target.value })}
-                  >
-                    <option value="image">Photo (Image)</option>
-                    <option value="video">Video (MP4 / WebM)</option>
-                  </select>
-                </div>
-              </div>
-
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-shell-700">
                   Photo or Video File / URL *
@@ -1236,12 +1500,38 @@ function InfrastructureTab() {
 
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-shell-700">
-                  Description
+                  Media Type
+                </label>
+                <select
+                  className={inputCls}
+                  value={form.mediaType}
+                  onChange={(e) => setForm({ ...form, mediaType: e.target.value })}
+                >
+                  <option value="image">Photo (Image)</option>
+                  <option value="video">Video (MP4 / WebM)</option>
+                </select>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-shell-700">
+                  Title / Caption (Optional)
+                </label>
+                <input
+                  className={inputCls}
+                  placeholder="Optional title or caption for this photo/video"
+                  value={form.title}
+                  onChange={(e) => setForm({ ...form, title: e.target.value })}
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-shell-700">
+                  Description (Optional)
                 </label>
                 <textarea
-                  rows={3}
+                  rows={2}
                   className={inputCls}
-                  placeholder="Describe this unit, equipment, capacity, or process..."
+                  placeholder="Optional short description..."
                   value={form.description}
                   onChange={(e) => setForm({ ...form, description: e.target.value })}
                 />

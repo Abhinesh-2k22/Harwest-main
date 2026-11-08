@@ -14,6 +14,7 @@ import mediaRoutes from './routes/media.js';
 import enquiryRoutes from './routes/enquiries.js';
 import productRoutes from './routes/products.js';
 import infrastructureRoutes from './routes/infrastructure.js';
+import analyticsRoutes from './routes/analytics.js';
 import blogRoutes from './routes/blogs.js';
 import faqRoutes from './routes/faqs.js';
 import { UPLOAD_DIR } from './middleware/upload.js';
@@ -84,6 +85,7 @@ app.use('/api/media', mediaRoutes);
 app.use('/api/enquiries', enquiryRoutes);
 app.use('/api/products', productRoutes);
 app.use('/api/infrastructure', infrastructureRoutes);
+app.use('/api/analytics', analyticsRoutes);
 app.use('/api/blogs', blogRoutes);
 app.use('/api/faqs', faqRoutes);
 

@@ -415,7 +415,7 @@ function Row({ p, flip, index }) {
 
           <p className="mt-4 text-base sm:text-lg text-shell-700 leading-relaxed">{displayShort}</p>
 
-          {Object.keys(displaySpecs).length > 0 && (
+          {!isCoirPithBlock && Object.keys(displaySpecs).length > 0 && (
             <div className="mt-6">
               <div className="mb-2 flex items-center justify-between">
                 <span className="text-xs font-bold uppercase tracking-wider text-shell-500">

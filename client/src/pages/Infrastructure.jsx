@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { Building2, Droplets, MapPin, Play, ArrowRight, CheckCircle2, X, Maximize2 } from 'lucide-react';
+import { Building2, Droplets, MapPin, ArrowRight, CheckCircle2, X, Maximize2 } from 'lucide-react';
 import { PageHero, Button, SectionTitle } from '../components/ui';
 import { Reveal } from '../lib/motion';
 import { api } from '../lib/api';
@@ -32,7 +32,6 @@ function isVideoMedia(item) {
 
 export default function Infrastructure() {
   const [items, setItems] = useState(DEFAULT_INFRASTRUCTURE);
-  const [activeCategory, setActiveCategory] = useState('All');
   const [lightboxItem, setLightboxItem] = useState(null);
 
   useEffect(() => {
@@ -52,10 +51,6 @@ export default function Infrastructure() {
       mounted = false;
     };
   }, []);
-
-  const categories = ['All', ...Array.from(new Set(items.map((i) => i.category).filter(Boolean)))];
-  const filtered =
-    activeCategory === 'All' ? items : items.filter((i) => i.category === activeCategory);
 
   return (
     <>
@@ -89,44 +84,20 @@ export default function Infrastructure() {
         </div>
       </section>
 
-      {/* INSIDE OUR UNITS — PHOTOS & VIDEOS GALLERY */}
+      {/* INSIDE OUR UNITS — PURE GALLERY OF PHOTOS & VIDEOS */}
       <section className="mx-auto max-w-7xl px-6 py-16">
-        <div className="flex flex-wrap items-end justify-between gap-6">
-          <SectionTitle
-            eyebrow="Inside Our Units"
-            title="Real Photos & Videos from the Site"
-            text="Explore our raw material yards, freshwater washing beds, concrete sun-drying floors, rotary sieves, and container stuffing operations."
-          />
+        <SectionTitle
+          eyebrow="Inside Our Units"
+          title="Real Photos & Videos from the Site"
+          text="Explore our raw material yards, freshwater washing beds, concrete sun-drying floors, rotary sieves, and container stuffing operations."
+        />
 
-          {/* Category Filter Pills */}
-          {categories.length > 2 && (
-            <div className="flex flex-wrap gap-2">
-              {categories.map((cat) => {
-                const active = activeCategory === cat;
-                return (
-                  <button
-                    key={cat}
-                    type="button"
-                    onClick={() => setActiveCategory(cat)}
-                    className={`rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wider transition ${
-                      active
-                        ? 'bg-leaf-800 text-white shadow-md'
-                        : 'border border-shell-200 bg-white text-shell-700 hover:border-leaf-300 hover:bg-leaf-50'
-                    }`}
-                  >
-                    {cat}
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </div>
-
-        {/* Media Grid */}
+        {/* Media Gallery Grid */}
         <div className="mt-12 grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {filtered.map((item, idx) => {
+          {items.map((item, idx) => {
             const isVideo = isVideoMedia(item);
             const mediaSrc = optimizeCloudinaryUrl(item.mediaUrl || '/images/factory.jpg');
+            const hasCaption = Boolean(item.title || item.description);
 
             return (
               <Reveal
@@ -147,9 +118,10 @@ export default function Infrastructure() {
                     <>
                       <img
                         src={mediaSrc}
-                        alt={item.title}
+                        alt={item.title || `HarWest Facility ${idx + 1}`}
                         loading={idx < 3 ? 'eager' : 'lazy'}
-                        className="h-full w-full object-cover transition duration-700 group-hover:scale-105"
+                        className="h-full w-full object-cover transition duration-700 group-hover:scale-105 cursor-pointer"
+                        onClick={() => setLightboxItem(item)}
                         onError={(e) => {
                           e.currentTarget.src = '/images/factory.jpg';
                         }}
@@ -157,34 +129,31 @@ export default function Infrastructure() {
                       <button
                         type="button"
                         onClick={() => setLightboxItem(item)}
-                        aria-label={`View ${item.title} fullscreen`}
+                        aria-label="View fullscreen"
                         className="absolute right-3 top-3 grid h-9 w-9 place-items-center rounded-full bg-black/55 text-white opacity-0 backdrop-blur-md transition group-hover:opacity-100 hover:bg-leaf-700"
                       >
                         <Maximize2 size={15} />
                       </button>
                     </>
                   )}
-
-                  {item.category && (
-                    <span className="pointer-events-none absolute left-3 top-3 inline-flex items-center gap-1.5 rounded-full bg-leaf-950/80 px-3 py-1 text-[11px] font-bold uppercase tracking-wider text-emerald-300 backdrop-blur-md border border-white/10">
-                      {isVideo && <Play size={11} className="fill-emerald-300" />}
-                      {item.category}
-                    </span>
-                  )}
                 </div>
 
-                <div className="flex flex-1 flex-col justify-between p-6">
-                  <div>
-                    <h3 className="font-head text-xl font-bold text-shell-900 group-hover:text-leaf-800 transition-colors">
-                      {item.title}
-                    </h3>
-                    {item.description && (
-                      <p className="mt-2 text-sm text-shell-600 leading-relaxed">
-                        {item.description}
-                      </p>
-                    )}
+                {hasCaption && (
+                  <div className="flex flex-1 flex-col justify-between p-6">
+                    <div>
+                      {item.title && (
+                        <h3 className="font-head text-xl font-bold text-shell-900 group-hover:text-leaf-800 transition-colors">
+                          {item.title}
+                        </h3>
+                      )}
+                      {item.description && (
+                        <p className="mt-2 text-sm text-shell-600 leading-relaxed">
+                          {item.description}
+                        </p>
+                      )}
+                    </div>
                   </div>
-                </div>
+                )}
               </Reveal>
             );
           })}
@@ -245,22 +214,22 @@ export default function Infrastructure() {
             </button>
             <img
               src={optimizeCloudinaryUrl(lightboxItem.mediaUrl)}
-              alt={lightboxItem.title}
+              alt={lightboxItem.title || 'HarWest Facility'}
               className="max-h-[75vh] w-full object-contain bg-black"
             />
-            <div className="p-6 text-white">
-              <span className="text-xs font-bold uppercase tracking-widest text-emerald-400">
-                {lightboxItem.category}
-              </span>
-              <h3 className="mt-1 font-head text-2xl font-bold">{lightboxItem.title}</h3>
-              {lightboxItem.description && (
-                <p className="mt-2 text-sm text-white/80">{lightboxItem.description}</p>
-              )}
-            </div>
+            {(lightboxItem.title || lightboxItem.description) && (
+              <div className="p-6 text-white">
+                {lightboxItem.title && (
+                  <h3 className="font-head text-2xl font-bold">{lightboxItem.title}</h3>
+                )}
+                {lightboxItem.description && (
+                  <p className="mt-2 text-sm text-white/80">{lightboxItem.description}</p>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}
     </>
   );
 }
-

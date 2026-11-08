@@ -1,8 +1,68 @@
 import { Router } from 'express';
 import { Enquiry } from '../models.js';
+import { config } from '../config.js';
 import { requireAdmin, csrfGuard } from '../middleware/auth.js';
 
 const router = Router();
+
+/**
+ * Non-blocking webhook call to Google Apps Script.
+ * Appends the enquiry to Google Sheets AND sends an instant email notification.
+ */
+async function forwardEnquiryToGoogleWebhook(enquiry) {
+  const webhookUrl = config.googleSheetsWebhookUrl;
+  if (!webhookUrl) return;
+
+  try {
+    const createdAt = enquiry.createdAt ? new Date(enquiry.createdAt) : new Date();
+    const istTimestamp =
+      createdAt.toLocaleString('en-IN', {
+        timeZone: 'Asia/Kolkata',
+        day: '2-digit',
+        month: 'short',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        second: '2-digit',
+        hour12: true,
+      }) + ' IST';
+
+    const payload = {
+      id: String(enquiry._id || ''),
+      timestamp: istTimestamp,
+      enquiryType: enquiry.enquiryType === 'domestic' ? 'Domestic (India)' : 'International',
+      name: enquiry.name || '',
+      company: enquiry.company || '',
+      location:
+        enquiry.enquiryType === 'domestic'
+          ? enquiry.state || ''
+          : enquiry.country || '',
+      country: enquiry.country || '',
+      state: enquiry.state || '',
+      email: enquiry.email || '',
+      phone: enquiry.phone || '',
+      product: enquiry.product || '',
+      volume: enquiry.volume || '',
+      message: enquiry.message || '',
+      notifyEmail: config.notifyEmail,
+    };
+
+    const res = await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+      redirect: 'follow',
+    });
+
+    if (!res.ok) {
+      console.warn(`[enquiries] Google Webhook responded with HTTP ${res.status}`);
+    } else {
+      console.log('[enquiries] Forwarded enquiry to Google Sheets & Email webhook.');
+    }
+  } catch (err) {
+    console.error('[enquiries] Failed to forward enquiry to Google Webhook:', err.message);
+  }
+}
 
 // PUBLIC: Submit customer enquiry
 router.post('/', async (req, res) => {
@@ -43,6 +103,9 @@ router.post('/', async (req, res) => {
       status: 'new',
       clientIp: String(clientIp).split(',')[0].trim(),
     });
+
+    // Fire-and-forget webhook to Google Sheets + Email notification
+    forwardEnquiryToGoogleWebhook(enquiry);
 
     res.status(201).json({
       success: true,

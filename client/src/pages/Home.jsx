@@ -8,11 +8,14 @@ import ProductShowcase from '../components/ProductShowcase';
 import FactoryVideoPlayer from '../components/FactoryVideoPlayer';
 import { useProducts } from '../lib/useProducts';
 
+const cropSvgCls =
+  'h-12 w-12 sm:h-20 sm:w-20 md:h-28 md:w-28 drop-shadow-sm transition-transform duration-300 group-hover:scale-110';
+
 const HYDROPONIC_CROPS = [
   {
     name: 'Raspberries',
     svg: (
-      <svg viewBox="0 0 120 120" className="h-24 w-24 sm:h-28 sm:w-28 drop-shadow-sm transition-transform duration-300 group-hover:scale-110">
+      <svg viewBox="0 0 120 120" className={cropSvgCls}>
         <g stroke="#1b3b28" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
           {/* Outer drupelets */}
           <circle cx="42" cy="36" r="11" fill="#c93b5b" />
@@ -44,7 +47,7 @@ const HYDROPONIC_CROPS = [
   {
     name: 'Blueberries',
     svg: (
-      <svg viewBox="0 0 120 120" className="h-24 w-24 sm:h-28 sm:w-28 drop-shadow-sm transition-transform duration-300 group-hover:scale-110">
+      <svg viewBox="0 0 120 120" className={cropSvgCls}>
         <g stroke="#1b3b28" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="60" cy="62" r="37" fill="#355c8a" />
           {/* Soft highlight */}
@@ -62,7 +65,7 @@ const HYDROPONIC_CROPS = [
   {
     name: 'Blackberries',
     svg: (
-      <svg viewBox="0 0 120 120" className="h-24 w-24 sm:h-28 sm:w-28 drop-shadow-sm transition-transform duration-300 group-hover:scale-110">
+      <svg viewBox="0 0 120 120" className={cropSvgCls}>
         <g stroke="#2a4a37" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="44" cy="36" r="10.5" fill="#1e192b" />
           <circle cx="60" cy="31" r="10.5" fill="#2d2540" />
@@ -91,7 +94,7 @@ const HYDROPONIC_CROPS = [
   {
     name: 'Strawberries',
     svg: (
-      <svg viewBox="0 0 120 120" className="h-24 w-24 sm:h-28 sm:w-28 drop-shadow-sm transition-transform duration-300 group-hover:scale-110">
+      <svg viewBox="0 0 120 120" className={cropSvgCls}>
         <g stroke="#1b3b28" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
           {/* Body */}
           <path
@@ -122,7 +125,7 @@ const HYDROPONIC_CROPS = [
   {
     name: 'Tomatoes',
     svg: (
-      <svg viewBox="0 0 120 120" className="h-24 w-24 sm:h-28 sm:w-28 drop-shadow-sm transition-transform duration-300 group-hover:scale-110">
+      <svg viewBox="0 0 120 120" className={cropSvgCls}>
         <g stroke="#1b3b28" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
           <ellipse cx="60" cy="65" rx="37" ry="32" fill="#de4a3f" />
           <path d="M78 46 A24 20 0 0 1 88 68" fill="none" stroke="#f2796f" strokeWidth="3" />
@@ -139,7 +142,7 @@ const HYDROPONIC_CROPS = [
   {
     name: 'Aubergines',
     svg: (
-      <svg viewBox="0 0 120 120" className="h-24 w-24 sm:h-28 sm:w-28 drop-shadow-sm transition-transform duration-300 group-hover:scale-110">
+      <svg viewBox="0 0 120 120" className={cropSvgCls}>
         <g stroke="#1b3b28" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
           <path
             d="M36 34 C46 30, 68 42, 82 58 C96 74, 92 95, 74 98 C54 101, 38 82, 33 62 C29 46, 30 37, 36 34 Z"
@@ -159,7 +162,7 @@ const HYDROPONIC_CROPS = [
   {
     name: 'Peppers',
     svg: (
-      <svg viewBox="0 0 120 120" className="h-24 w-24 sm:h-28 sm:w-28 drop-shadow-sm transition-transform duration-300 group-hover:scale-110">
+      <svg viewBox="0 0 120 120" className={cropSvgCls}>
         <g stroke="#1b3b28" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
           {/* Stem */}
           <path d="M56 34 L53 20 L63 20 L65 34 Z" fill="#4f944d" />
@@ -184,7 +187,7 @@ const HYDROPONIC_CROPS = [
   {
     name: 'Cucumbers',
     svg: (
-      <svg viewBox="0 0 120 120" className="h-24 w-24 sm:h-28 sm:w-28 drop-shadow-sm transition-transform duration-300 group-hover:scale-110">
+      <svg viewBox="0 0 120 120" className={cropSvgCls}>
         <g stroke="#1b3b28" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
           <path
             d="M30 34 C38 30, 56 46, 72 62 C86 76, 96 86, 90 94 C84 100, 64 94, 46 76 C30 60, 24 38, 30 34 Z"
@@ -201,7 +204,7 @@ const HYDROPONIC_CROPS = [
   {
     name: 'Cannabis',
     svg: (
-      <svg viewBox="0 0 120 120" className="h-24 w-24 sm:h-28 sm:w-28 drop-shadow-sm transition-transform duration-300 group-hover:scale-110">
+      <svg viewBox="0 0 120 120" className={cropSvgCls}>
         <g stroke="#1b3b28" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="#6bb344">
           {/* Center leaflet */}
           <path d="M60 82 C54 60, 55 34, 60 18 C65 34, 66 60, 60 82 Z" />
@@ -223,7 +226,7 @@ const HYDROPONIC_CROPS = [
   {
     name: 'Ginger',
     svg: (
-      <svg viewBox="0 0 120 120" className="h-24 w-24 sm:h-28 sm:w-28 drop-shadow-sm transition-transform duration-300 group-hover:scale-110">
+      <svg viewBox="0 0 120 120" className={cropSvgCls}>
         <g stroke="#1b3b28" strokeWidth="2.3" strokeLinecap="round" strokeLinejoin="round">
           <path
             d="M46 96 C41 84, 42 74, 34 72 C24 70, 22 58, 31 56 C38 55, 42 62, 44 52 C45 40, 38 30, 48 23 C58 17, 68 26, 66 38 C65 46, 64 54, 72 48 C78 42, 82 28, 92 32 C100 36, 98 50, 90 58 C84 64, 78 72, 74 84 C70 94, 54 102, 46 96 Z"
@@ -245,25 +248,25 @@ const HYDROPONIC_CROPS = [
 function HomeFaqItem({ q, a }) {
   const [open, setOpen] = useState(false);
   return (
-    <div className={`overflow-hidden rounded-2xl border transition-all duration-300 bg-white shadow-sm ${open ? 'border-leaf-400 ring-2 ring-leaf-100 shadow-md' : 'border-shell-200/90 hover:border-leaf-300'
+    <div className={`overflow-hidden rounded-xl sm:rounded-2xl border transition-all duration-300 bg-white shadow-sm ${open ? 'border-leaf-400 ring-2 ring-leaf-100 shadow-md' : 'border-shell-200/90 hover:border-leaf-300'
       }`}>
       <button
-        className="flex w-full items-center justify-between px-6 py-5 text-left font-head text-base sm:text-lg font-bold text-shell-900 transition hover:text-leaf-700"
+        className="flex w-full items-center justify-between px-4 py-3.5 sm:px-6 sm:py-5 text-left font-head text-[13px] sm:text-lg font-bold text-shell-900 transition hover:text-leaf-700"
         onClick={() => setOpen(!open)}
         aria-expanded={open}
       >
-        <span className="flex items-center gap-3">
-          <span className={`grid h-6 w-6 place-items-center rounded-full text-xs font-bold transition ${open ? 'bg-leaf-600 text-white' : 'bg-shell-100 text-shell-600'
+        <span className="flex items-center gap-2.5 sm:gap-3 pr-2">
+          <span className={`grid h-5 w-5 sm:h-6 sm:w-6 shrink-0 place-items-center rounded-full text-[10px] sm:text-xs font-bold transition ${open ? 'bg-leaf-600 text-white' : 'bg-shell-100 text-shell-600'
             }`}>
             {open ? '−' : '+'}
           </span>
-          {q}
+          <span className="leading-snug">{q}</span>
         </span>
-        <ChevronDown className={`shrink-0 transition-transform duration-300 ${open ? 'rotate-180 text-leaf-600' : 'text-shell-400'}`} />
+        <ChevronDown className={`h-4 w-4 sm:h-5 sm:w-5 shrink-0 transition-transform duration-300 ${open ? 'rotate-180 text-leaf-600' : 'text-shell-400'}`} />
       </button>
       <div className={`grid transition-all duration-300 ease-in-out ${open ? 'grid-rows-[1fr] opacity-100' : 'grid-rows-[0fr] opacity-0'}`}>
-        <div className="overflow-hidden px-6 text-shell-700 leading-relaxed">
-          <p className="pb-5 pt-1 pl-6 text-sm md:text-base border-l-2 border-leaf-300 ml-1 bg-leaf-50/40 p-4 rounded-r-xl">
+        <div className="overflow-hidden px-4 sm:px-6 text-shell-700 leading-relaxed">
+          <p className="mb-3.5 sm:mb-5 pt-1 pl-4 sm:pl-6 text-xs sm:text-base border-l-2 border-leaf-300 ml-1 bg-leaf-50/40 p-3 sm:p-4 rounded-r-xl">
             {a}
           </p>
         </div>
@@ -351,17 +354,19 @@ export default function Home() {
             </p>
           </Reveal>
 
-          <div className="mt-12 grid grid-cols-2 gap-y-10 gap-x-6 sm:grid-cols-3 md:grid-cols-5 md:gap-y-12 md:gap-x-8">
+          <div className="mt-8 sm:mt-12 grid grid-cols-4 gap-y-5 gap-x-2.5 sm:gap-y-10 sm:gap-x-6 md:grid-cols-5 md:gap-y-12 md:gap-x-8">
             {HYDROPONIC_CROPS.map((crop, idx) => (
               <Reveal
                 key={crop.name}
                 delay={idx * 50}
-                className="group flex flex-col items-center justify-center"
+                className={`group flex-col items-center justify-center ${
+                  idx >= 8 ? 'hidden md:flex' : 'flex'
+                }`}
               >
-                <div className="flex h-28 w-28 sm:h-32 sm:w-32 items-center justify-center rounded-3xl bg-shell-50/70 border border-shell-200/70 p-3 shadow-sm transition-all duration-300 group-hover:border-leaf-300 group-hover:bg-leaf-50/50 group-hover:shadow-md">
+                <div className="flex h-16 w-16 sm:h-24 sm:w-24 md:h-32 md:w-32 items-center justify-center rounded-2xl sm:rounded-3xl bg-shell-50/70 border border-shell-200/70 p-2 sm:p-3 shadow-sm transition-all duration-300 group-hover:border-leaf-300 group-hover:bg-leaf-50/50 group-hover:shadow-md">
                   {crop.svg}
                 </div>
-                <span className="mt-3.5 font-head text-sm sm:text-base font-bold tracking-wide text-shell-800 group-hover:text-leaf-800 transition-colors">
+                <span className="mt-2 sm:mt-3.5 font-head text-[11px] sm:text-sm md:text-base font-bold tracking-wide text-shell-800 group-hover:text-leaf-800 transition-colors leading-tight">
                   {crop.name}
                 </span>
               </Reveal>
@@ -424,20 +429,22 @@ export default function Home() {
       </section>
 
       {/* FAQ SECTION */}
-      <section className="mx-auto max-w-4xl px-6 py-24">
-        <SectionTitle
-          center
-          eyebrow="Got Questions?"
-          title="Frequently Asked Questions"
-          text="Everything you need to know about coco coir characteristics, washing grades, and global container shipping."
-        />
-        <div className="mt-12 space-y-4">
+      <section className="mx-auto max-w-4xl px-5 py-14 sm:px-6 sm:py-24">
+        <div className="max-md:scale-[0.9] max-md:origin-top">
+          <SectionTitle
+            center
+            eyebrow="Got Questions?"
+            title="Frequently Asked Questions"
+            text="Everything you need to know about coco coir characteristics, washing grades, and global container shipping."
+          />
+        </div>
+        <div className="mt-6 sm:mt-12 space-y-2.5 sm:space-y-4">
           {FAQ.slice(0, 5).map((f) => (
             <HomeFaqItem key={f.q} {...f} />
           ))}
         </div>
-        <div className="mt-10 text-center">
-          <Button to="/contact" variant="ghost" className="!text-leaf-800 !border-leaf-600 hover:!bg-leaf-50">
+        <div className="mt-8 sm:mt-10 text-center">
+          <Button to="/contact" variant="ghost" className="!text-leaf-800 !border-leaf-600 hover:!bg-leaf-50 max-sm:!text-xs max-sm:!px-4 max-sm:!py-2.5">
             Have More Questions? Contact Our Team <ArrowRight size={16} />
           </Button>
         </div>
