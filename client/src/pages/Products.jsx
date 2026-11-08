@@ -451,7 +451,7 @@ function Row({ p, flip, index, stacked = false }) {
 
           <div className={`flex flex-wrap items-center gap-4 ${stacked ? 'mt-auto pt-6' : 'mt-8'}`}>
             <Button to="/contact">
-              Request Container <ArrowRight size={16} />
+              Request Quote <ArrowRight size={16} />
             </Button>
           </div>
         </div>
