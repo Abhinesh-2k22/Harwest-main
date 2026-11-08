@@ -206,7 +206,7 @@ export const CATALOGUE = [
         name: 'Natural Brown Coir Fiber',
         badge: 'Mature Husk Extraction',
         short:
-          'High-tensile natural brown coconut fibre extracted from matured Pollachi coconut husks. Cleaned, dried and hydraulically baled for erosion control blankets, geotextiles, horticultural basket liners and mattress manufacturing.',
+          'High-tensile natural brown coconut fibre extracted from matured Pollachi coconut husks. Cleaned, dried and hydraulically baled for erosion control blankets, geotextiles, horticultural basket liners and industrial applications.',
         image: '/images/factory.jpg',
         specs: {
           'Fibre Length': '10 – 25 cm (Long & Medium grades)',

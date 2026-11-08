@@ -49,7 +49,7 @@ function isSafeUrl(url) {
 router.get('/', async (_req, res) => {
   try {
     const items = await Media.find().lean();
-    res.set('Cache-Control', 'public, max-age=30');
+    res.set('Cache-Control', 'no-store, no-cache, must-revalidate');
     res.json(Object.fromEntries(items.map((m) => [m.key, m.url])));
   } catch (err) {
     console.error('[media] Error fetching media keys:', err);
@@ -57,13 +57,17 @@ router.get('/', async (_req, res) => {
   }
 });
 
-/** Automatically applies f_auto,q_auto:good,w_1920,c_limit to Cloudinary delivery URLs */
+/** Automatically applies Cloudinary delivery optimization flags (f_mp4 for videos, f_auto for images) */
 function optimizeCloudinaryUrl(url) {
   if (typeof url !== 'string' || !url.includes('res.cloudinary.com') || !url.includes('/upload/')) {
     return url;
   }
-  if (url.includes('f_auto') || url.includes('q_auto')) {
+  if (url.includes('f_auto') || url.includes('q_auto') || url.includes('f_mp4') || url.includes('vc_auto')) {
     return url;
+  }
+  const isVideo = url.includes('/video/upload/') || /\.(mp4|webm|mov)$/i.test(url);
+  if (isVideo) {
+    return url.replace('/upload/', '/upload/f_mp4,vc_auto,q_auto:good,w_1920,c_limit/');
   }
   return url.replace('/upload/', '/upload/f_auto,q_auto:good,w_1920,c_limit/');
 }

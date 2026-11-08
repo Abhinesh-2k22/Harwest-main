@@ -51,10 +51,24 @@ async function ensureProductsSynced() {
       doc.specs = template.specs;
       changed = true;
     }
-    if (template.slug === 'coconut-fiber' && Array.isArray(doc.variants) && doc.variants.some((v) => /white\s*bristle/i.test(v))) {
-      doc.variants = template.variants;
-      doc.variantDetails = template.variantDetails;
-      changed = true;
+    if (
+      template.slug === 'coconut-fiber' ||
+      doc.slug === 'coconut-fiber' ||
+      doc.name === 'Coconut Fiber'
+    ) {
+      const hasOldVariant =
+        (Array.isArray(doc.variants) &&
+          (doc.variants.length > 1 || doc.variants.some((v) => /bristle|mattress|white/i.test(v)))) ||
+        (Array.isArray(doc.variantDetails) &&
+          (doc.variantDetails.length > 1 || doc.variantDetails.some((vd) => /bristle|mattress|white/i.test(vd.name))));
+
+      if (hasOldVariant || !Array.isArray(doc.variantDetails) || doc.variantDetails.length === 0) {
+        doc.variants = ['Natural Brown Coir Fiber'];
+        doc.variantDetails = template.variantDetails.filter((vd) => !/bristle|mattress|white/i.test(vd.name));
+        doc.short = template.short;
+        doc.specs = template.specs;
+        changed = true;
+      }
     }
     if (!Array.isArray(doc.variantDetails) || doc.variantDetails.length === 0) {
       doc.variantDetails = template.variantDetails;

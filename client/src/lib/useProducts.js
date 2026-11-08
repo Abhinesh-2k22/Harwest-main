@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import { PRODUCTS as FALLBACK } from '../config/siteContent';
 import { api } from './api';
 
-const STORAGE_KEY = 'hw_products_cache_v3';
+const STORAGE_KEY = 'hw_products_cache_v4';
 
 // In-memory cache across tab clicks
 let memoryProducts = null;

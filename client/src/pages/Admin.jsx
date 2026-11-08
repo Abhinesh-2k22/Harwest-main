@@ -688,7 +688,7 @@ function ProductsTab() {
 
   const openEdit = (p) => {
     setEditing(p);
-    const existingDetails = Array.isArray(p.variantDetails) && p.variantDetails.length > 0
+    const rawDetails = Array.isArray(p.variantDetails) && p.variantDetails.length > 0
       ? p.variantDetails
       : (p.variants || []).map((vName) => ({
           name: vName,
@@ -697,6 +697,11 @@ function ProductsTab() {
           image: p.image || '',
           specs: p.specs || {},
         }));
+
+    // Filter out White Bristle / Mattress Fiber
+    const existingDetails = rawDetails.filter(
+      (vd) => !/bristle|mattress/i.test(vd.name || '')
+    );
 
     setForm({
       name: p.name || '',
@@ -897,9 +902,10 @@ function ProductsTab() {
                   </div>
                 )}
                 <p className="mt-2 text-xs text-shell-600 line-clamp-3 leading-relaxed">{p.short}</p>
-                {(p.variants || []).length > 0 && (
+                {(p.variants || []).filter((v) => !/bristle|mattress/i.test(v)).length > 0 && (
                   <p className="mt-2 text-[11px] text-shell-500">
-                    <span className="font-semibold text-shell-700">Types:</span> {p.variants.join(' · ')}
+                    <span className="font-semibold text-shell-700">Types:</span>{' '}
+                    {p.variants.filter((v) => !/bristle|mattress/i.test(v)).join(' · ')}
                   </p>
                 )}
               </div>
@@ -2382,7 +2388,7 @@ function readVideoSize(file) {
   });
 }
 
-function MediaCard({ id, meta, current, overridden, onChanged }) {
+function MediaCard({ id, meta, current, overridden, onChanged, onUpdateLocally, onResetLocally }) {
   const [url, setUrl] = useState('');
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState(null);
@@ -2431,7 +2437,9 @@ function MediaCard({ id, meta, current, overridden, onChanged }) {
     run(async () => {
       const { url: u } = await api.upload(file, setProgress);
       setProgress(100);
-      await api.setMedia(id, u);
+      const saved = await api.setMedia(id, u);
+      const effectiveUrl = saved?.url || u;
+      if (onUpdateLocally) onUpdateLocally(id, effectiveUrl);
     }, isLargeVideo ? 'Uploaded! High-res video was automatically compressed to web HD.' : 'Uploaded & applied to live website!');
   };
 
@@ -2453,7 +2461,7 @@ function MediaCard({ id, meta, current, overridden, onChanged }) {
       )}
       <div className={`w-full overflow-hidden rounded-xl ${meta.size ? 'aspect-video bg-shell-100' : isLogo ? 'h-28 bg-leaf-950 p-4 flex items-center justify-center' : 'h-36 bg-shell-100'}`}>
         {isVideo ? (
-          <video src={current} controls muted className="h-full w-full bg-black object-cover" />
+          <video key={current} src={current} controls muted className="h-full w-full bg-black object-cover" />
         ) : (
           <img
             src={current}
@@ -2493,7 +2501,8 @@ function MediaCard({ id, meta, current, overridden, onChanged }) {
           disabled={busy || !url}
           onClick={() =>
             run(async () => {
-              await api.setMedia(id, url);
+              const saved = await api.setMedia(id, url);
+              if (onUpdateLocally) onUpdateLocally(id, saved?.url || url);
               setUrl('');
             }, 'Saved')
           }
@@ -2537,7 +2546,12 @@ function MediaCard({ id, meta, current, overridden, onChanged }) {
         {overridden && (
           <button
             disabled={busy}
-            onClick={() => run(() => api.resetMedia(id), 'Reset to default')}
+            onClick={() =>
+              run(async () => {
+                await api.resetMedia(id);
+                if (onResetLocally) onResetLocally(id);
+              }, 'Reset to default')
+            }
             className="flex items-center gap-1 rounded-xl border border-shell-300 px-3 py-2 text-sm hover:bg-shell-50"
             title="Reset to default"
           >
@@ -2570,7 +2584,7 @@ function MediaCard({ id, meta, current, overridden, onChanged }) {
 }
 
 function MediaTab() {
-  const { overrides, refresh, get } = useMedia();
+  const { overrides, refresh, setOverrideLocally, removeOverrideLocally, get } = useMedia();
 
   return (
     <div className="space-y-8">
@@ -2597,6 +2611,8 @@ function MediaTab() {
                   current={get(id)}
                   overridden={!!overrides[id]}
                   onChanged={refresh}
+                  onUpdateLocally={setOverrideLocally}
+                  onResetLocally={removeOverrideLocally}
                 />
               ))}
           </div>

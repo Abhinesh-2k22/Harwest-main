@@ -14,6 +14,7 @@ export function PageHero({ eyebrow, title, text, image, video, breadcrumb }) {
       {/* Background Video if configured, otherwise Background Image */}
       {vSrc ? (
         <video
+          key={vSrc}
           src={vSrc}
           autoPlay
           muted

@@ -288,6 +288,7 @@ export default function Home() {
       <section className="grain relative isolate flex min-h-[94vh] items-center overflow-hidden bg-leaf-950 text-white">
         {heroVideo ? (
           <video
+            key={heroVideo}
             src={heroVideo}
             autoPlay
             muted
@@ -424,7 +425,7 @@ export default function Home() {
           </p>
         </div>
         <Reveal>
-          <FactoryVideoPlayer src={tour} poster={factory} />
+          <FactoryVideoPlayer key={tour} src={tour} poster={factory} />
         </Reveal>
       </section>
 

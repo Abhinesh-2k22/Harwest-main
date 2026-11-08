@@ -106,6 +106,7 @@ export default function FactoryVideoPlayer({ src, poster }) {
       {/* Video — nothing overlays the picture except a tiny badge & the paused play button */}
       <div className="relative bg-black">
         <video
+          key={videoUrl}
           ref={videoRef}
           src={videoUrl}
           poster={poster}

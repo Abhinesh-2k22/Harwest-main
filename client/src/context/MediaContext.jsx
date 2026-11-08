@@ -54,16 +54,39 @@ export function MediaProvider({ children }) {
     }
   }, [overrides]);
 
+  const setOverrideLocally = useCallback((key, url) => {
+    setOverrides((prev) => {
+      const next = { ...prev, [key]: url };
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  }, []);
+
+  const removeOverrideLocally = useCallback((key) => {
+    setOverrides((prev) => {
+      const next = { ...prev };
+      delete next[key];
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      } catch {}
+      return next;
+    });
+  }, []);
+
   const value = useMemo(
     () => ({
       overrides,
       refresh,
+      setOverrideLocally,
+      removeOverrideLocally,
       get: (key) => {
         const raw = overrides[key] || ASSET_DEFAULTS[key]?.url || '';
         return optimizeCloudinaryUrl(raw);
       },
     }),
-    [overrides, refresh]
+    [overrides, refresh, setOverrideLocally, removeOverrideLocally]
   );
   return <MediaContext.Provider value={value}>{children}</MediaContext.Provider>;
 }

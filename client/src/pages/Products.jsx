@@ -247,8 +247,12 @@ function BlockSpecVisualizer({ selectedKey, onSelectKey }) {
 }
 
 function buildVariantList(p) {
-  const details = Array.isArray(p.variantDetails) ? p.variantDetails : [];
-  const names = Array.isArray(p.variants) ? p.variants : [];
+  const details = (Array.isArray(p.variantDetails) ? p.variantDetails : []).filter(
+    (d) => !/bristle|mattress/i.test(d.name || '')
+  );
+  const names = (Array.isArray(p.variants) ? p.variants : []).filter(
+    (name) => !/bristle|mattress/i.test(name || '')
+  );
 
   if (details.length > 0) {
     return details.map((d) => ({
