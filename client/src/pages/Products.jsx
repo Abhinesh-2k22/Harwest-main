@@ -364,7 +364,7 @@ function Row({ p, flip, index, stacked = false }) {
             </div>
           )}
 
-          <div className={`flex flex-wrap items-center gap-3 ${stacked ? 'sm:min-h-[4.5rem]' : ''}`}>
+          <div className="flex flex-wrap items-center gap-2.5">
             <h2 className={stacked ? 'text-2xl sm:text-3xl font-bold text-shell-900' : 'text-3xl sm:text-4xl font-bold text-shell-900'}>{p.name}</h2>
             {displayBadge && (
               <span className="rounded-full bg-leaf-100 border border-leaf-300 px-3 py-1 text-xs font-bold text-leaf-900">
@@ -375,22 +375,32 @@ function Row({ p, flip, index, stacked = false }) {
 
           {/* Interactive Clickable Product Types */}
           {variantList.length > 0 && (
-            <div className={`mt-5 rounded-2xl border border-leaf-200/90 bg-leaf-50/50 p-4 shadow-sm ${stacked ? 'sm:min-h-[12.5rem]' : ''}`}>
+            <div
+              className={`mt-3.5 rounded-xl border border-leaf-200/90 bg-leaf-50/50 shadow-xs ${
+                stacked ? 'p-3' : 'mt-5 rounded-2xl p-4 shadow-sm'
+              }`}
+            >
               <div className="flex items-center justify-between gap-2">
-                <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-leaf-900">
-                  <span className="relative flex h-2.5 w-2.5">
+                <p className="flex items-center gap-1.5 text-[11px] sm:text-xs font-bold uppercase tracking-wider text-leaf-900">
+                  <span className="relative flex h-2 w-2">
                     <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-leaf-500 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-leaf-600" />
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-leaf-600" />
                   </span>
                   Available Product Types
                 </p>
-                <span className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-0.5 text-[11px] font-semibold text-leaf-700 border border-leaf-200 shadow-2xs">
-                  <MousePointerClick size={12} className="text-leaf-600 animate-bounce" />
-                  Click type to switch view
-                </span>
+                {variantList.length > 1 && (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-[10px] font-semibold text-leaf-700 border border-leaf-200 shadow-2xs">
+                    <MousePointerClick size={11} className="text-leaf-600 animate-bounce" />
+                    {stacked ? 'Switch view' : 'Click type to switch view'}
+                  </span>
+                )}
               </div>
 
-              <div className="mt-3 grid gap-2.5 sm:grid-cols-2">
+              <div
+                className={`mt-2.5 grid gap-2 ${
+                  stacked && variantList.length <= 1 ? 'grid-cols-1' : 'sm:grid-cols-2'
+                }`}
+              >
                 {variantList.map((v, idx) => {
                   const isSelected = idx === selectedIdx;
                   return (
@@ -399,30 +409,34 @@ function Row({ p, flip, index, stacked = false }) {
                       type="button"
                       onClick={() => setSelectedIdx(idx)}
                       aria-pressed={isSelected}
-                      className={`group flex items-center justify-between gap-2 rounded-xl border px-3.5 py-3 text-left text-sm font-bold transition-all duration-200 ${
+                      className={`group flex items-center justify-between gap-2 rounded-lg border text-left font-bold transition-all duration-200 ${
+                        stacked ? 'px-3 py-2 text-xs' : 'px-3.5 py-3 text-sm rounded-xl'
+                      } ${
                         isSelected
-                          ? 'border-leaf-700 bg-leaf-800 text-white shadow-md ring-2 ring-leaf-400/50 scale-[1.01]'
-                          : 'border-shell-200 bg-white text-shell-800 hover:border-leaf-400 hover:bg-leaf-50/80 shadow-xs'
+                          ? 'border-leaf-700 bg-leaf-800 text-white shadow-sm ring-1 ring-leaf-400/50'
+                          : 'border-shell-200 bg-white text-shell-800 hover:border-leaf-400 hover:bg-leaf-50/80 shadow-2xs'
                       }`}
                     >
-                      <span className="flex items-center gap-2.5 min-w-0">
+                      <span className="flex items-center gap-2 min-w-0">
                         <span
-                          className={`h-2.5 w-2.5 shrink-0 rounded-full transition ${
+                          className={`h-2 w-2 shrink-0 rounded-full transition ${
                             isSelected
-                              ? 'bg-emerald-300 shadow-[0_0_8px_rgba(110,231,183,0.9)] animate-pulse'
+                              ? 'bg-emerald-300 shadow-[0_0_6px_rgba(110,231,183,0.9)] animate-pulse'
                               : 'bg-leaf-500 group-hover:scale-125'
                           }`}
                         />
                         <span className="truncate">{v.name}</span>
                       </span>
-                      <ChevronRight
-                        size={16}
-                        className={`shrink-0 transition-transform duration-200 ${
-                          isSelected
-                            ? 'translate-x-0.5 text-emerald-300'
-                            : 'text-shell-400 group-hover:translate-x-1 group-hover:text-leaf-700'
-                        }`}
-                      />
+                      {variantList.length > 1 && (
+                        <ChevronRight
+                          size={14}
+                          className={`shrink-0 transition-transform duration-200 ${
+                            isSelected
+                              ? 'translate-x-0.5 text-emerald-300'
+                              : 'text-shell-400 group-hover:translate-x-0.5 group-hover:text-leaf-700'
+                          }`}
+                        />
+                      )}
                     </button>
                   );
                 })}
@@ -430,18 +444,18 @@ function Row({ p, flip, index, stacked = false }) {
             </div>
           )}
 
-          <p className={`mt-4 text-shell-700 leading-relaxed ${stacked ? 'text-sm sm:text-base line-clamp-4 sm:min-h-[6.5rem]' : 'text-base sm:text-lg'}`}>{displayShort}</p>
+          <p className={`mt-3.5 text-shell-700 leading-relaxed ${stacked ? 'text-xs sm:text-sm line-clamp-3' : 'text-base sm:text-lg mt-4'}`}>{displayShort}</p>
 
           {!isCoirPithBlock && Object.keys(displaySpecs).length > 0 && (
-            <div className="mt-6">
+            <div className={stacked ? 'mt-4' : 'mt-6'}>
               <div className="mb-2 flex items-center justify-between">
                 <span className="text-xs font-bold uppercase tracking-wider text-shell-500">
                   Technical Specifications {activeVariant ? `— ${activeVariant.name}` : ''}
                 </span>
               </div>
-              <dl className="divide-y divide-shell-200 overflow-hidden rounded-2xl bg-white shadow-sm border border-shell-200/80">
+              <dl className="divide-y divide-shell-200 overflow-hidden rounded-xl bg-white shadow-sm border border-shell-200/80">
                 {Object.entries(displaySpecs).map(([k, v]) => (
-                  <div key={k} className="flex justify-between gap-4 px-5 py-3 text-sm transition hover:bg-leaf-50/50">
+                  <div key={k} className={`flex justify-between gap-3 transition hover:bg-leaf-50/50 ${stacked ? 'px-3.5 py-2 text-xs' : 'px-5 py-3 text-sm'}`}>
                     <dt className="font-medium text-shell-600">{k}</dt>
                     <dd className="font-semibold text-shell-900 text-right">{v}</dd>
                   </div>
@@ -450,7 +464,7 @@ function Row({ p, flip, index, stacked = false }) {
             </div>
           )}
 
-          <div className={`flex flex-wrap items-center gap-4 ${stacked ? 'mt-auto pt-6' : 'mt-8'}`}>
+          <div className={`flex flex-wrap items-center gap-4 ${stacked ? 'mt-auto pt-5' : 'mt-8'}`}>
             <Button to="/contact">
               Request Quote <ArrowRight size={16} />
             </Button>

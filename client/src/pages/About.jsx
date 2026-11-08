@@ -42,8 +42,8 @@ export default function About() {
           <div className="absolute -bottom-6 -right-4 flex h-32 w-32 items-center justify-center rounded-full border-4 border-white bg-leaf-900 p-2 text-center text-white shadow-xl ring-2 ring-coconut-400/40">
             <div className="flex flex-col items-center">
               <Leaf size={20} className="text-coconut-300" />
-              <span className="text-[10px] font-bold uppercase tracking-wider text-coconut-200">100% Coir</span>
-              <span className="text-[9px] text-white/80">Finest Raw Husk</span>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-coconut-200">Finest Raw Husk</span>
+              <span className="text-[9px] text-white/80"></span>
             </div>
           </div>
         </Reveal>
@@ -55,10 +55,10 @@ export default function About() {
               Sustainable Coir Solutions, Rooted in Tropical India
             </h2>
             <p className="mt-4 text-shell-800 leading-relaxed font-semibold text-leaf-800">
-              HARWEST is a blend of two meaningful words – HARVEST + WEST.
+              HARWEST is a blend of two meaningful words – HARVEST + WEST (WESTERN GHATS).
             </p>
             <p className="mt-3 text-shell-700 leading-relaxed">
-              <strong className="text-shell-900">WEST</strong> represents the Western Ghats, particularly Pollachi, Tamil Nadu, a region renowned for its rich coconut-growing heritage. This is where our journey begins, transforming carefully sourced coconut resources into premium-quality cocopeat for global markets.
+              <strong className="text-shell-900">WEST</strong> represents the <b>Western Ghats</b>, particularly Pollachi, Tamil Nadu, a region renowned for its rich coconut-growing heritage. This is where our journey begins, transforming carefully sourced coconut resources into premium-quality cocopeat for global markets.
             </p>
             <p className="mt-3 text-shell-700 leading-relaxed">
               <strong className="text-shell-900">HARVEST</strong> reflects our purpose – helping growers achieve healthier plant growth, greater productivity and better yields.
