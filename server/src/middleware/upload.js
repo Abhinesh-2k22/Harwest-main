@@ -24,7 +24,12 @@ export const upload = multer({
     filename: (_req, file, cb) =>
       cb(null, crypto.randomBytes(16).toString('hex') + MIME_EXT[file.mimetype]),
   }),
-  limits: { fileSize: config.maxUploadMb * 1024 * 1024, files: 1 },
+  // Allows up to maxVideoUploadMb (250 MB) so large videos are never rejected with "File too large"
+  // Instead, the server ingests the file and automatically compresses it down via Cloudinary's streaming transcoding pipeline
+  limits: {
+    fileSize: Math.max(config.maxUploadMb || 50, config.maxVideoUploadMb || 250) * 1024 * 1024,
+    files: 1,
+  },
   fileFilter: (_req, file, cb) =>
     MIME_EXT[file.mimetype] ? cb(null, true) : cb(new Error('Unsupported file type')),
 });

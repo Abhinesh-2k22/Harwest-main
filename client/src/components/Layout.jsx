@@ -13,7 +13,7 @@ function Logo() {
         <img
           src={logo}
           alt={SITE.name}
-          className="h-11 sm:h-14 w-auto max-w-[200px] sm:max-w-[260px] object-contain transition-transform duration-300 group-hover:scale-105"
+          className="h-10 sm:h-12 md:h-14 w-auto max-w-[210px] sm:max-w-[260px] object-contain object-left transition-transform duration-300 group-hover:scale-[1.02] drop-shadow-[0_2px_8px_rgba(0,0,0,0.2)]"
         />
       ) : (
         <span className="flex items-center gap-2 font-head text-2xl font-bold tracking-tight text-white">
@@ -358,9 +358,18 @@ function Footer() {
 export default function Layout() {
   const { pathname } = useLocation();
 
-  // Record website visit & page click for Admin Analytics
+  // Record 1 website visit per user session, and record each tab navigation under Tab Clicks
   useEffect(() => {
-    api.recordVisit(pathname).catch(() => {});
+    let isNewVisit = false;
+    try {
+      if (!sessionStorage.getItem('hw_session_visit_counted')) {
+        sessionStorage.setItem('hw_session_visit_counted', '1');
+        isNewVisit = true;
+      }
+    } catch {
+      isNewVisit = true;
+    }
+    api.recordVisit(pathname, isNewVisit).catch(() => {});
   }, [pathname]);
 
   return (

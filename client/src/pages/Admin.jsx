@@ -32,6 +32,7 @@ import {
   MousePointerClick,
   TrendingUp,
   Globe2,
+  Crop,
 } from 'lucide-react';
 import { api } from '../lib/api';
 import { ASSET_DEFAULTS, ASSET_GROUPS } from '../config/assets';
@@ -43,6 +44,7 @@ import {
   DEFAULT_INFRASTRUCTURE,
 } from '../config/siteContent';
 import GrowLoader from '../components/GrowLoader';
+import ImageCropModal from '../components/ImageCropModal';
 
 const inputCls =
   'w-full rounded-xl border border-shell-200 bg-white px-3.5 py-2.5 text-sm outline-none transition focus:border-leaf-500 focus:ring-2 focus:ring-leaf-200/50';
@@ -294,12 +296,17 @@ function AnalyticsOverview({ analytics, onReset, resetting }) {
           </div>
         </div>
 
-        {/* Right Column: Page Clicks + Product Demand */}
+        {/* Right Column: Tab Clicks + Product Demand */}
         <div className="lg:col-span-5 grid gap-4 content-start">
           <div className="rounded-2xl border border-shell-200 bg-white p-4">
-            <h4 className="font-head text-xs font-bold uppercase tracking-wider text-shell-700 mb-3">
-              Page Clicks Breakdown
-            </h4>
+            <div className="mb-3">
+              <h4 className="font-head text-xs font-bold uppercase tracking-wider text-shell-700">
+                Tab Clicks Breakdown
+              </h4>
+              <p className="text-[11px] text-shell-500 mt-0.5">
+                Every navigation click across website tabs (separate from unique website visits)
+              </p>
+            </div>
             <div className="space-y-2.5">
               {pageClicks.map((p) => {
                 const pct = Math.round((p.clicks / maxPageClicks) * 100);
@@ -395,6 +402,9 @@ function EnquiriesTab() {
     setResettingClicks(true);
     try {
       await api.resetAnalytics();
+      try {
+        sessionStorage.removeItem('hw_session_visit_counted');
+      } catch {}
       const freshStats = await api.getAnalyticsSummary().catch(() => null);
       if (freshStats) setAnalytics(freshStats);
     } catch (e) {
@@ -626,6 +636,7 @@ function ProductsTab() {
   const [uploadPct, setUploadPct] = useState(null);
   const [variantUploadIdx, setVariantUploadIdx] = useState(null);
   const [loadError, setLoadError] = useState('');
+  const [cropRequest, setCropRequest] = useState(null); // { fileOrUrl, target: 'main' | number, title }
   const fileRef = useRef(null);
 
   const EMPTY_FORM = {
@@ -742,19 +753,27 @@ function ProductsTab() {
     }));
   };
 
-  const handleVariantUpload = async (idx, e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const uploadVariantFile = async (idx, fileToUpload) => {
     setVariantUploadIdx(idx);
     setUploadPct(0);
     try {
-      const { url } = await api.upload(file, setUploadPct);
+      const { url } = await api.upload(fileToUpload, setUploadPct);
       updateVariantField(idx, 'image', url);
     } catch (er) {
       alert('Variant photo upload failed: ' + er.message);
     }
     setUploadPct(null);
     setVariantUploadIdx(null);
+  };
+
+  const handleVariantUpload = (idx, e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setCropRequest({
+      fileOrUrl: file,
+      target: idx,
+      title: `Crop & Preview Type Photo (#${idx + 1})`,
+    });
     e.target.value = '';
   };
 
@@ -767,18 +786,26 @@ function ProductsTab() {
     }
   };
 
-  const handleUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  const uploadMainProductFile = async (fileToUpload) => {
     setVariantUploadIdx(null);
     setUploadPct(0);
     try {
-      const { url } = await api.upload(file, setUploadPct);
+      const { url } = await api.upload(fileToUpload, setUploadPct);
       setForm((prev) => ({ ...prev, image: url }));
     } catch (er) {
       alert('Upload failed: ' + er.message);
     }
     setUploadPct(null);
+  };
+
+  const handleUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setCropRequest({
+      fileOrUrl: file,
+      target: 'main',
+      title: `Crop & Preview Product Image — ${form.name || 'Product'}`,
+    });
     e.target.value = '';
   };
 
@@ -999,8 +1026,25 @@ function ProductsTab() {
                     onClick={() => fileRef.current.click()}
                     className="flex shrink-0 items-center gap-1.5 rounded-xl border border-shell-300 bg-shell-100 px-3.5 py-2 text-xs font-bold text-shell-800 hover:bg-shell-200 disabled:opacity-50"
                   >
-                    <Upload size={14} /> Upload
+                    <Upload size={14} /> Upload &amp; Crop
                   </button>
+                  {form.image && (
+                    <button
+                      type="button"
+                      disabled={uploadPct !== null}
+                      onClick={() =>
+                        setCropRequest({
+                          fileOrUrl: form.image,
+                          target: 'main',
+                          title: `Crop & Preview Product Image — ${form.name || 'Product'}`,
+                        })
+                      }
+                      className="flex shrink-0 items-center gap-1.5 rounded-xl border border-leaf-300 bg-leaf-50 px-3 py-2 text-xs font-bold text-leaf-800 hover:bg-leaf-100 disabled:opacity-50"
+                      title="Crop & preview current product image"
+                    >
+                      <Crop size={14} /> Crop View
+                    </button>
+                  )}
                 </div>
                 {uploadPct !== null && variantUploadIdx === null && (
                   <div className="mt-3 flex justify-center">
@@ -1109,7 +1153,7 @@ function ProductsTab() {
                               onChange={(e) => updateVariantField(idx, 'image', e.target.value)}
                             />
                             <label className="flex shrink-0 cursor-pointer items-center gap-1.5 rounded-xl border border-shell-300 bg-shell-100 px-3.5 py-2 text-xs font-bold text-shell-800 hover:bg-shell-200">
-                              <Upload size={14} /> Upload
+                              <Upload size={14} /> Upload &amp; Crop
                               <input
                                 type="file"
                                 hidden
@@ -1117,6 +1161,22 @@ function ProductsTab() {
                                 onChange={(e) => handleVariantUpload(idx, e)}
                               />
                             </label>
+                            {vItem.image && (
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  setCropRequest({
+                                    fileOrUrl: vItem.image,
+                                    target: idx,
+                                    title: `Crop & Preview Type Photo — ${vItem.name || `#${idx + 1}`}`,
+                                  })
+                                }
+                                className="flex shrink-0 items-center gap-1.5 rounded-xl border border-leaf-300 bg-leaf-50 px-3 py-2 text-xs font-bold text-leaf-800 hover:bg-leaf-100"
+                                title="Crop & preview this type photo"
+                              >
+                                <Crop size={14} /> Crop View
+                              </button>
+                            )}
                           </div>
                           {uploadPct !== null && variantUploadIdx === idx && (
                             <div className="mt-2 flex justify-center">
@@ -1193,6 +1253,23 @@ function ProductsTab() {
           </div>
         </div>
       )}
+
+      <ImageCropModal
+        open={!!cropRequest}
+        fileOrUrl={cropRequest?.fileOrUrl}
+        title={cropRequest?.title || 'Crop & Preview Product Image'}
+        defaultPreset="4:3"
+        onCancel={() => setCropRequest(null)}
+        onComplete={async (croppedFile) => {
+          const target = cropRequest?.target;
+          setCropRequest(null);
+          if (target === 'main') {
+            await uploadMainProductFile(croppedFile);
+          } else if (typeof target === 'number') {
+            await uploadVariantFile(target, croppedFile);
+          }
+        }}
+      />
     </div>
   );
 }
@@ -1207,7 +1284,9 @@ function InfrastructureTab() {
   const [editing, setEditing] = useState(null);
   const [busy, setBusy] = useState(false);
   const [uploadPct, setUploadPct] = useState(null);
+  const [uploadLabel, setUploadLabel] = useState('Uploading media');
   const [loadError, setLoadError] = useState('');
+  const [cropSource, setCropSource] = useState(null);
   const fileRef = useRef(null);
 
   const EMPTY_FORM = {
@@ -1263,13 +1342,19 @@ function InfrastructureTab() {
     setModalOpen(true);
   };
 
-  const handleUpload = async (e) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-    const isVid = file.type.startsWith('video/');
+  const uploadMediaFile = async (fileToUpload, isVid = false) => {
+    const isLargeVideo = isVid && fileToUpload.size > 50 * 1024 * 1024;
+    const mb = (fileToUpload.size / (1024 * 1024)).toFixed(1);
+    setUploadLabel(
+      isLargeVideo
+        ? `Video is ${mb} MB (>50 MB limit) · Auto-compressing & uploading…`
+        : isVid
+        ? 'Uploading video'
+        : 'Uploading image'
+    );
     setUploadPct(0);
     try {
-      const { url } = await api.upload(file, setUploadPct);
+      const { url } = await api.upload(fileToUpload, setUploadPct);
       setForm((prev) => ({
         ...prev,
         mediaUrl: url,
@@ -1279,7 +1364,18 @@ function InfrastructureTab() {
       alert('Upload failed: ' + er.message);
     }
     setUploadPct(null);
+  };
+
+  const handleUpload = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const isVid = file.type.startsWith('video/');
     e.target.value = '';
+    if (isVid) {
+      await uploadMediaFile(file, true);
+    } else {
+      setCropSource(file);
+    }
   };
 
   const toggleActive = async (item) => {
@@ -1479,12 +1575,23 @@ function InfrastructureTab() {
                     onClick={() => fileRef.current.click()}
                     className="flex shrink-0 items-center gap-1.5 rounded-xl border border-shell-300 bg-shell-100 px-3.5 py-2 text-xs font-bold text-shell-800 hover:bg-shell-200 disabled:opacity-50"
                   >
-                    <Upload size={14} /> Upload
+                    <Upload size={14} /> Upload &amp; Crop
                   </button>
+                  {form.mediaUrl && form.mediaType !== 'video' && (
+                    <button
+                      type="button"
+                      disabled={uploadPct !== null}
+                      onClick={() => setCropSource(form.mediaUrl)}
+                      className="flex shrink-0 items-center gap-1.5 rounded-xl border border-leaf-300 bg-leaf-50 px-3 py-2 text-xs font-bold text-leaf-800 hover:bg-leaf-100 disabled:opacity-50"
+                      title="Crop & preview this gallery photo"
+                    >
+                      <Crop size={14} /> Crop View
+                    </button>
+                  )}
                 </div>
                 {uploadPct !== null && (
                   <div className="mt-3 flex justify-center">
-                    <GrowLoader overlay={false} progress={uploadPct} label="Uploading media" />
+                    <GrowLoader overlay={false} progress={uploadPct} label={uploadLabel} />
                   </div>
                 )}
                 {form.mediaUrl && uploadPct === null && (
@@ -1582,6 +1689,18 @@ function InfrastructureTab() {
           </div>
         </div>
       )}
+
+      <ImageCropModal
+        open={!!cropSource}
+        fileOrUrl={cropSource}
+        title="Crop & Preview Infrastructure Photo"
+        defaultPreset="4:3"
+        onCancel={() => setCropSource(null)}
+        onComplete={async (croppedFile) => {
+          setCropSource(null);
+          await uploadMediaFile(croppedFile, false);
+        }}
+      />
     </div>
   );
 }
@@ -1595,6 +1714,7 @@ function BlogsTab() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState(null);
   const [busy, setBusy] = useState(false);
+  const [cropSource, setCropSource] = useState(null);
   const fileRef = useRef(null);
 
   const [form, setForm] = useState({
@@ -1657,17 +1777,21 @@ function BlogsTab() {
     setModalOpen(true);
   };
 
-  const handleUpload = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  const uploadBlogCoverFile = async (fileToUpload) => {
     setBusy(true);
     try {
-      const { url } = await api.upload(file);
+      const { url } = await api.upload(fileToUpload);
       setForm((prev) => ({ ...prev, coverImage: url }));
     } catch (er) {
       alert('Upload failed: ' + er.message);
     }
     setBusy(false);
+  };
+
+  const handleUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setCropSource(file);
     e.target.value = '';
   };
 
@@ -1916,8 +2040,19 @@ function BlogsTab() {
                     onClick={() => fileRef.current.click()}
                     className="flex shrink-0 items-center gap-1.5 rounded-xl border border-shell-300 bg-shell-100 px-3.5 py-2 text-xs font-bold text-shell-800 hover:bg-shell-200"
                   >
-                    <Upload size={14} /> Upload
+                    <Upload size={14} /> Upload &amp; Crop
                   </button>
+                  {form.coverImage && (
+                    <button
+                      type="button"
+                      disabled={busy}
+                      onClick={() => setCropSource(form.coverImage)}
+                      className="flex shrink-0 items-center gap-1.5 rounded-xl border border-leaf-300 bg-leaf-50 px-3 py-2 text-xs font-bold text-leaf-800 hover:bg-leaf-100"
+                      title="Crop & preview article cover image"
+                    >
+                      <Crop size={14} /> Crop View
+                    </button>
+                  )}
                 </div>
               </div>
 
@@ -1964,6 +2099,18 @@ function BlogsTab() {
           </div>
         </div>
       )}
+
+      <ImageCropModal
+        open={!!cropSource}
+        fileOrUrl={cropSource}
+        title="Crop & Preview Article Cover Image"
+        defaultPreset="16:9"
+        onCancel={() => setCropSource(null)}
+        onComplete={async (croppedFile) => {
+          setCropSource(null);
+          await uploadBlogCoverFile(croppedFile);
+        }}
+      />
     </div>
   );
 }
@@ -2239,8 +2386,12 @@ function MediaCard({ id, meta, current, overridden, onChanged }) {
   const [url, setUrl] = useState('');
   const [busy, setBusy] = useState(false);
   const [progress, setProgress] = useState(null);
+  const [uploadLabel, setUploadLabel] = useState(meta.type === 'video' ? 'Uploading video' : 'Uploading image');
   const [msg, setMsg] = useState('');
+  const [cropSource, setCropSource] = useState(null);
   const fileRef = useRef(null);
+  const isLogo = id === 'branding.logo';
+  const isVideo = meta.type === 'video';
 
   const run = async (fn, ok) => {
     setBusy(true);
@@ -2256,8 +2407,8 @@ function MediaCard({ id, meta, current, overridden, onChanged }) {
     setBusy(false);
   };
 
-  const handleFile = async (file) => {
-    if (meta.size && meta.type === 'video') {
+  const uploadMediaFile = async (file) => {
+    if (meta.size && isVideo) {
       const dims = await readVideoSize(file);
       const [w, h] = meta.size;
       if (dims && (dims[0] !== w || dims[1] !== h)) {
@@ -2267,12 +2418,29 @@ function MediaCard({ id, meta, current, overridden, onChanged }) {
         if (!ok) return;
       }
     }
+    const isLargeVideo = isVideo && file.size > 50 * 1024 * 1024;
+    const mb = (file.size / (1024 * 1024)).toFixed(1);
+    setUploadLabel(
+      isLargeVideo
+        ? `Video is ${mb} MB (>50 MB limit) · Auto-compressing & uploading…`
+        : isVideo
+        ? 'Uploading video'
+        : 'Uploading image'
+    );
     setProgress(0);
     run(async () => {
       const { url: u } = await api.upload(file, setProgress);
       setProgress(100);
       await api.setMedia(id, u);
-    }, 'Uploaded. Replaced file is queued for Cloudinary auto-deletion (per TRASH_TIMER_SECONDS).');
+    }, isLargeVideo ? 'Uploaded! High-res video was automatically compressed to web HD.' : 'Uploaded & applied to live website!');
+  };
+
+  const handleFile = async (file) => {
+    if (isVideo) {
+      await uploadMediaFile(file);
+    } else {
+      setCropSource(file);
+    }
   };
 
   return (
@@ -2280,14 +2448,22 @@ function MediaCard({ id, meta, current, overridden, onChanged }) {
       {busy && (
         <GrowLoader
           progress={progress}
-          label={progress === null ? 'Saving…' : meta.type === 'video' ? 'Uploading video' : 'Uploading image'}
+          label={progress === null ? 'Saving…' : uploadLabel}
         />
       )}
-      <div className={`w-full overflow-hidden rounded-xl bg-shell-100 ${meta.size ? 'aspect-video' : 'h-36'}`}>
-        {meta.type === 'video' ? (
+      <div className={`w-full overflow-hidden rounded-xl ${meta.size ? 'aspect-video bg-shell-100' : isLogo ? 'h-28 bg-leaf-950 p-4 flex items-center justify-center' : 'h-36 bg-shell-100'}`}>
+        {isVideo ? (
           <video src={current} controls muted className="h-full w-full bg-black object-cover" />
         ) : (
-          <img src={current} alt="" className="h-full w-full object-cover" />
+          <img
+            src={current}
+            alt=""
+            className={
+              isLogo
+                ? 'max-h-16 w-auto max-w-[210px] object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.2)]'
+                : 'h-full w-full object-cover'
+            }
+          />
         )}
       </div>
 
@@ -2299,6 +2475,11 @@ function MediaCard({ id, meta, current, overridden, onChanged }) {
             <span className="ml-1 rounded bg-leaf-100 px-1.5 text-leaf-700 font-semibold">customized</span>
           )}
         </p>
+        {meta.resolution && (
+          <div className="mt-2 rounded-xl border border-leaf-200 bg-leaf-50/90 px-3 py-2 text-[11px] font-semibold leading-relaxed text-leaf-900">
+            📐 {meta.resolution}
+          </div>
+        )}
       </div>
 
       <div className="flex gap-2">
@@ -2323,12 +2504,12 @@ function MediaCard({ id, meta, current, overridden, onChanged }) {
         </button>
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex flex-wrap gap-2">
         <input
           ref={fileRef}
           type="file"
           hidden
-          accept={meta.type === 'video' ? 'video/mp4,video/webm' : 'image/jpeg,image/png,image/webp'}
+          accept={isVideo ? 'video/mp4,video/webm' : 'image/jpeg,image/png,image/webp'}
           onChange={(e) => {
             const file = e.target.files[0];
             if (file) handleFile(file);
@@ -2338,15 +2519,26 @@ function MediaCard({ id, meta, current, overridden, onChanged }) {
         <button
           disabled={busy}
           onClick={() => fileRef.current.click()}
-          className="flex flex-1 items-center justify-center gap-2 rounded-xl bg-shell-800 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-shell-900 disabled:opacity-40"
+          className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-shell-800 px-3 py-2 text-xs font-bold text-white shadow-sm transition hover:bg-shell-900 disabled:opacity-40"
         >
-          <Upload size={14} /> Upload to Cloud
+          <Upload size={14} /> {isVideo ? 'Upload Video' : 'Upload & Crop'}
         </button>
+        {!isVideo && current && (
+          <button
+            type="button"
+            disabled={busy}
+            onClick={() => setCropSource(current)}
+            className="flex items-center justify-center gap-1.5 rounded-xl border border-leaf-300 bg-leaf-50 px-3 py-2 text-xs font-bold text-leaf-800 transition hover:bg-leaf-100 disabled:opacity-40"
+            title="Crop & preview how this image looks on the website"
+          >
+            <Crop size={14} /> Crop View
+          </button>
+        )}
         {overridden && (
           <button
             disabled={busy}
             onClick={() => run(() => api.resetMedia(id), 'Reset to default')}
-            className="flex items-center gap-1 rounded-xl border border-shell-300 px-3 text-sm hover:bg-shell-50"
+            className="flex items-center gap-1 rounded-xl border border-shell-300 px-3 py-2 text-sm hover:bg-shell-50"
             title="Reset to default"
           >
             <RotateCcw size={14} />
@@ -2354,6 +2546,25 @@ function MediaCard({ id, meta, current, overridden, onChanged }) {
         )}
       </div>
       {msg && <p className="text-xs text-shell-600">{msg}</p>}
+
+      {!isVideo && (
+        <ImageCropModal
+          open={!!cropSource}
+          fileOrUrl={cropSource}
+          title={
+            isLogo
+              ? 'Crop & Preview Website Logo (Live Navbar View)'
+              : `Crop & Preview — ${meta.label}`
+          }
+          defaultPreset={isLogo ? 'logo' : id.startsWith('hero.') ? '16:9' : '4:3'}
+          isLogo={isLogo}
+          onCancel={() => setCropSource(null)}
+          onComplete={async (croppedFile) => {
+            setCropSource(null);
+            await uploadMediaFile(croppedFile);
+          }}
+        />
+      )}
     </div>
   );
 }

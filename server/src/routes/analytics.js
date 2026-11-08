@@ -6,6 +6,37 @@ const router = Router();
 
 const regionNames = new Intl.DisplayNames(['en'], { type: 'region' });
 const ipCountryCache = new Map();
+// Session deduplication (30-min rolling window per visitor IP + User-Agent) so clicking multiple tabs counts as 1 website visit
+const recentVisitorSessions = new Map();
+const SESSION_TTL_MS = 30 * 60 * 1000;
+
+function checkAndMarkVisitorSession(req, clientIsNewVisit) {
+  const now = Date.now();
+  if (recentVisitorSessions.size > 2000) {
+    for (const [k, ts] of recentVisitorSessions.entries()) {
+      if (now - ts > SESSION_TTL_MS) recentVisitorSessions.delete(k);
+    }
+  }
+  const ip = extractClientIp(req) || 'unknown';
+  const ua = String(req.headers['user-agent'] || '').slice(0, 100);
+  const sessionKey = `${ip}|${ua}`;
+  const lastSeen = recentVisitorSessions.get(sessionKey);
+
+  // If the client says it's a tab navigation within an active tab session, only update rolling timestamp and don't count as a new visit
+  if (!clientIsNewVisit) {
+    recentVisitorSessions.set(sessionKey, now);
+    return false;
+  }
+
+  // Even if clientIsNewVisit is true (e.g. page reload), deduplicate if seen within the active session window
+  if (lastSeen && now - lastSeen < SESSION_TTL_MS) {
+    recentVisitorSessions.set(sessionKey, now);
+    return false;
+  }
+
+  recentVisitorSessions.set(sessionKey, now);
+  return true;
+}
 
 const TIMEZONE_TO_COUNTRY = {
   'Asia/Kolkata': 'India',
@@ -170,11 +201,15 @@ async function resolveVisitorCountry(req, clientTimezone) {
   return '';
 }
 
-// PUBLIC: Record a website visit / page click with accurate country detection
+// PUBLIC: Record a website visit / tab click with accurate country detection
+// - One user visiting the site and clicking across multiple tabs is counted as 1 Website Visit (and 1 Country Visit)
+// - Every tab navigation is counted inside `pageClicks` (Tab Clicks Breakdown)
 router.post('/visit', async (req, res) => {
   try {
     const path = req.body?.path || '/';
     const tz = req.body?.tz || '';
+    const clientIsNewVisit = Boolean(req.body?.isNewVisit);
+
     // Don't count admin or health check hits as public website visits
     if (String(path).startsWith('/admin') || String(path).startsWith('/health')) {
       return res.json({ ok: true, ignored: true });
@@ -182,15 +217,21 @@ router.post('/visit', async (req, res) => {
 
     const todayKey = getIstDateKey();
     const pageKey = normalizePageKey(path);
-    const countryName = sanitizeMongoMapKey(await resolveVisitorCountry(req, tz));
+    const shouldCountUniqueVisit = checkAndMarkVisitorSession(req, clientIsNewVisit);
 
+    // Always record the tab click
     const incFields = {
-      totalVisits: 1,
-      [`dailyVisits.${todayKey}`]: 1,
       [`pageClicks.${pageKey}`]: 1,
     };
-    if (countryName) {
-      incFields[`countryClicks.${countryName}`] = 1;
+
+    let countryName = '';
+    if (shouldCountUniqueVisit) {
+      countryName = sanitizeMongoMapKey(await resolveVisitorCountry(req, tz));
+      incFields.totalVisits = 1;
+      incFields[`dailyVisits.${todayKey}`] = 1;
+      if (countryName) {
+        incFields[`countryClicks.${countryName}`] = 1;
+      }
     }
 
     const updated = await SiteAnalytics.findOneAndUpdate(
@@ -199,7 +240,12 @@ router.post('/visit', async (req, res) => {
       { upsert: true, new: true }
     ).lean();
 
-    res.json({ ok: true, totalVisits: updated?.totalVisits || 1, country: countryName });
+    res.json({
+      ok: true,
+      countedAsNewVisit: shouldCountUniqueVisit,
+      totalVisits: updated?.totalVisits || 0,
+      country: countryName,
+    });
   } catch (err) {
     console.error('[analytics] Error recording visit:', err.message);
     res.status(200).json({ ok: false });
@@ -209,6 +255,7 @@ router.post('/visit', async (req, res) => {
 // ADMIN: Reset all click & visit counters to zero (does not touch customer enquiries)
 router.delete('/reset', requireAdmin, csrfGuard, async (_req, res) => {
   try {
+    recentVisitorSessions.clear();
     await SiteAnalytics.findOneAndUpdate(
       { key: 'global' },
       {

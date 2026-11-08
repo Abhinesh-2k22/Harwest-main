@@ -24,6 +24,7 @@ export const config = {
     : 'dev_secret_harwest_coir_at_least_32_characters_long_for_security',
   jwtExpiresIn: process.env.JWT_EXPIRES_IN || '8h',
   maxUploadMb: Number(process.env.MAX_UPLOAD_MB) || 50,
+  maxVideoUploadMb: Number(process.env.MAX_VIDEO_UPLOAD_MB) || 250,
   trashTimerSeconds: Number(process.env.TRASH_TIMER_SECONDS) || 30,
   cookieName: 'hw_admin',
   cloudinary: {

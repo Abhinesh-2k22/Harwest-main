@@ -54,12 +54,15 @@ export const api = {
   health: () => request('/health'),
 
   // --- Website Visits & Analytics ---
-  recordVisit: (path = '/') => {
+  recordVisit: (path = '/', isNewVisit = false) => {
     let tz = '';
     try {
       tz = Intl.DateTimeFormat().resolvedOptions().timeZone || '';
     } catch {}
-    return request('/analytics/visit', { method: 'POST', body: { path, tz } });
+    return request('/analytics/visit', {
+      method: 'POST',
+      body: { path, tz, isNewVisit: Boolean(isNewVisit) },
+    });
   },
   getAnalyticsSummary: () => request('/analytics/summary'),
   resetAnalytics: () => request('/analytics/reset', { method: 'DELETE' }),

@@ -10,7 +10,12 @@
  */
 export const ASSET_DEFAULTS = {
   // BRANDING
-  'branding.logo': { url: 'https://res.cloudinary.com/yi8e4nqo/image/upload/v1793173304/harwest/logo.jpg', type: 'image', label: 'HarWest official logo' },
+  'branding.logo': {
+    url: 'https://res.cloudinary.com/yi8e4nqo/image/upload/v1793173304/harwest/logo.jpg',
+    type: 'image',
+    label: 'HarWest official rectangular logo',
+    resolution: 'Recommended Resolution: 480 × 150 px (or 640 × 200 px) · Horizontal Rectangle (~3.2 : 1 ratio) · Transparent PNG / WebP / JPG',
+  },
 
   // HOME HERO
   'hero.image': { url: 'https://res.cloudinary.com/yi8e4nqo/image/upload/v1793173306/harwest/hero.jpg', type: 'image', label: 'Home hero background image' },

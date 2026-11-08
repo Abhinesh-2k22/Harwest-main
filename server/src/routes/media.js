@@ -104,7 +104,15 @@ router.delete('/:key', requireAdmin, csrfGuard, async (req, res) => {
 
 router.post('/upload', requireAdmin, csrfGuard, (req, res) => {
   upload.single('file')(req, res, async (err) => {
-    if (err) return res.status(400).json({ error: err.message });
+    if (err) {
+      if (err.code === 'LIMIT_FILE_SIZE') {
+        const ceilingMb = Math.max(config.maxUploadMb || 50, config.maxVideoUploadMb || 250);
+        return res.status(400).json({
+          error: `File exceeds maximum allowed upload size (${ceilingMb} MB). Please select a file under ${ceilingMb} MB.`,
+        });
+      }
+      return res.status(400).json({ error: err.message });
+    }
     if (!req.file) return res.status(400).json({ error: 'No file provided' });
     const full = path.join(UPLOAD_DIR, req.file.filename);
 
@@ -114,20 +122,47 @@ router.post('/upload', requireAdmin, csrfGuard, (req, res) => {
     }
 
     // If Cloudinary is configured, upload with transformation flags and delete local temp file
+    // Large videos (>50 MB) use chunked upload_large and auto-compress down to standard 1080p web bitrate
     if (hasCloudinary) {
       try {
         const isVideo = req.file.mimetype.startsWith('video/');
-        const result = await cloudinary.uploader.upload(full, {
+        const isLarge = req.file.size > 20 * 1024 * 1024;
+        const uploadFn = (fileToUpload, opts) =>
+          isVideo || isLarge
+            ? cloudinary.uploader.upload_large(fileToUpload, opts)
+            : cloudinary.uploader.upload(fileToUpload, opts);
+
+        const result = await uploadFn(full, {
           folder: 'harwest_uploads',
           resource_type: isVideo ? 'video' : 'image',
-          transformation: [
-            { width: 1920, crop: 'limit', quality: 'auto:good', fetch_format: 'auto' },
-          ],
+          chunk_size: 6 * 1024 * 1024,
+          transformation: isVideo
+            ? [
+                {
+                  width: 1920,
+                  crop: 'limit',
+                  quality: 'auto:good',
+                  bit_rate: '2500k',
+                  fetch_format: 'auto',
+                },
+              ]
+            : [
+                {
+                  width: 1920,
+                  crop: 'limit',
+                  quality: 'auto:good',
+                  fetch_format: 'auto',
+                },
+              ],
         });
         try { fs.unlinkSync(full); } catch {}
 
         const finalUrl = optimizeCloudinaryUrl(result.secure_url);
-        return res.json({ url: finalUrl });
+        return res.json({
+          url: finalUrl,
+          compressed: isVideo && req.file.size > (config.maxUploadMb || 50) * 1024 * 1024,
+          originalSize: req.file.size,
+        });
       } catch (cloudErr) {
         console.error('[media] Cloudinary upload error:', cloudErr);
         // Fall back to local URL if Cloudinary upload failed
