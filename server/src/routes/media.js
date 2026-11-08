@@ -135,10 +135,22 @@ router.post('/upload', requireAdmin, csrfGuard, (req, res) => {
         resource_type: isVideo ? 'video' : 'image',
         chunk_size: 6 * 1024 * 1024,
       };
+      // NOTE: cloudinary.uploader.upload_large() returns a stream (NOT a promise) -> must use its callback
       const send = (opts) =>
-        isVideo || req.file.size > 20 * 1024 * 1024
-          ? cloudinary.uploader.upload_large(full, opts)
-          : cloudinary.uploader.upload(full, opts);
+        new Promise((resolve, reject) => {
+          const cb = (error, result) => {
+            if (error) return reject(error);
+            if (!result || !(result.secure_url || result.url)) {
+              return reject(new Error('Cloudinary returned no file URL'));
+            }
+            resolve(result);
+          };
+          if (isVideo || req.file.size > 20 * 1024 * 1024) {
+            cloudinary.uploader.upload_large(full, opts, cb);
+          } else {
+            cloudinary.uploader.upload(full, opts, cb);
+          }
+        });
 
       try {
         let result;
@@ -161,7 +173,8 @@ router.post('/upload', requireAdmin, csrfGuard, (req, res) => {
         }
         try { fs.unlinkSync(full); } catch {}
 
-        const finalUrl = optimizeCloudinaryUrl(result.secure_url);
+        const rawUrl = (result.secure_url || result.url || '').replace(/^http:\/\//, 'https://');
+        const finalUrl = optimizeCloudinaryUrl(rawUrl);
         return res.json({ url: finalUrl, originalSize: req.file.size });
       } catch (cloudErr) {
         console.error('[media] Cloudinary upload error:', cloudErr);
