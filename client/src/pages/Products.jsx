@@ -349,7 +349,7 @@ function Row({ p, flip, index, stacked = false }) {
         </div>
 
         {/* Product Content & Interactive Variant Selector */}
-        <div className={stacked ? 'flex-1' : undefined}>
+        <div className={stacked ? 'flex flex-1 flex-col' : undefined}>
           {(p.categories || []).length > 0 && (
             <div className="mb-3 flex flex-wrap gap-2">
               {p.categories.map((c) => (
@@ -363,7 +363,7 @@ function Row({ p, flip, index, stacked = false }) {
             </div>
           )}
 
-          <div className="flex flex-wrap items-center gap-3">
+          <div className={`flex flex-wrap items-center gap-3 ${stacked ? 'sm:min-h-[4.5rem]' : ''}`}>
             <h2 className={stacked ? 'text-2xl sm:text-3xl font-bold text-shell-900' : 'text-3xl sm:text-4xl font-bold text-shell-900'}>{p.name}</h2>
             {displayBadge && (
               <span className="rounded-full bg-leaf-100 border border-leaf-300 px-3 py-1 text-xs font-bold text-leaf-900">
@@ -374,7 +374,7 @@ function Row({ p, flip, index, stacked = false }) {
 
           {/* Interactive Clickable Product Types */}
           {variantList.length > 0 && (
-            <div className="mt-5 rounded-2xl border border-leaf-200/90 bg-leaf-50/50 p-4 shadow-sm">
+            <div className={`mt-5 rounded-2xl border border-leaf-200/90 bg-leaf-50/50 p-4 shadow-sm ${stacked ? 'sm:min-h-[12.5rem]' : ''}`}>
               <div className="flex items-center justify-between gap-2">
                 <p className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-leaf-900">
                   <span className="relative flex h-2.5 w-2.5">
@@ -389,7 +389,7 @@ function Row({ p, flip, index, stacked = false }) {
                 </span>
               </div>
 
-              <div className={`mt-3 grid gap-2.5 ${stacked ? 'sm:grid-cols-2' : 'sm:grid-cols-2'}`}>
+              <div className="mt-3 grid gap-2.5 sm:grid-cols-2">
                 {variantList.map((v, idx) => {
                   const isSelected = idx === selectedIdx;
                   return (
@@ -429,7 +429,7 @@ function Row({ p, flip, index, stacked = false }) {
             </div>
           )}
 
-          <p className={`mt-4 text-shell-700 leading-relaxed ${stacked ? 'text-sm sm:text-base' : 'text-base sm:text-lg'}`}>{displayShort}</p>
+          <p className={`mt-4 text-shell-700 leading-relaxed ${stacked ? 'text-sm sm:text-base line-clamp-4 sm:min-h-[6.5rem]' : 'text-base sm:text-lg'}`}>{displayShort}</p>
 
           {!isCoirPithBlock && Object.keys(displaySpecs).length > 0 && (
             <div className="mt-6">
@@ -449,9 +449,9 @@ function Row({ p, flip, index, stacked = false }) {
             </div>
           )}
 
-          <div className="mt-8 flex flex-wrap items-center gap-4">
+          <div className={`flex flex-wrap items-center gap-4 ${stacked ? 'mt-auto pt-6' : 'mt-8'}`}>
             <Button to="/contact">
-              Request Container Quote <ArrowRight size={16} />
+              Request Container <ArrowRight size={16} />
             </Button>
           </div>
         </div>
