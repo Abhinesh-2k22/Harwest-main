@@ -453,13 +453,15 @@ export default function Home() {
 
       {/* CTA SECTION */}
       <section className="px-6 pb-6 sm:pb-8">
-        <div className="grain relative mx-auto max-w-6xl overflow-hidden leaf-radius bg-gradient-to-br from-leaf-800 to-leaf-950 px-8 py-16 text-center text-white shadow-2xl border border-leaf-700/40">
-          <h2 className="mx-auto max-w-2xl text-4xl font-bold md:text-5xl">Ready to Grow with HarWest?</h2>
-          <p className="mx-auto mt-4 max-w-xl text-white/80">
+        <div className="grain relative mx-auto max-w-4xl overflow-hidden leaf-radius bg-gradient-to-br from-leaf-800 to-leaf-950 px-6 py-8 sm:py-9 text-center text-white shadow-xl border border-leaf-700/40">
+          <h2 className="mx-auto max-w-xl text-2xl font-bold sm:text-3xl">Ready to Grow with HarWest?</h2>
+          <p className="mx-auto mt-2.5 max-w-lg text-sm sm:text-base text-white/80 leading-relaxed">
             Tell us your target crop, spec requirements, and volume — our technical team will courier samples and provide full container CIF pricing.
           </p>
-          <div className="mt-8">
-            <Button to="/contact" variant="shell">Get a Custom Quote <ArrowRight size={18} /></Button>
+          <div className="mt-5 sm:mt-6">
+            <Button to="/contact" variant="shell" className="!py-2.5 !px-6 text-sm">
+              Get a Custom Quote <ArrowRight size={16} />
+            </Button>
           </div>
         </div>
       </section>

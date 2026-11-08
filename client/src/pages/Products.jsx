@@ -273,7 +273,16 @@ function buildVariantList(p) {
   }));
 }
 
-function Row({ p, flip, index }) {
+// The product that carries the Low EC vs High EC visualizer keeps the wide side-by-side layout
+function isVisualizerProduct(p, index) {
+  return (
+    p.slug === 'coir-pith-blocks' ||
+    /coir\s*pith.*5\s*kg/i.test(p.name || '') ||
+    index === 0
+  );
+}
+
+function Row({ p, flip, index, stacked = false }) {
   const variantList = buildVariantList(p);
   const [selectedIdx, setSelectedIdx] = useState(0);
 
@@ -288,10 +297,7 @@ function Row({ p, flip, index }) {
       ? activeVariant.specs
       : p.specs || {};
 
-  const isCoirPithBlock =
-    p.slug === 'coir-pith-blocks' ||
-    /coir\s*pith.*5\s*kg/i.test(p.name || '') ||
-    index === 0;
+  const isCoirPithBlock = isVisualizerProduct(p, index);
 
   const handleVisualizerSelect = (key) => {
     if (key === 'lowEc') {
@@ -307,8 +313,14 @@ function Row({ p, flip, index }) {
     activeVariant && /high\s*ec/i.test(activeVariant.name) ? 'highEc' : 'lowEc';
 
   return (
-    <div className="space-y-8">
-      <Reveal className={`grid items-start gap-12 lg:grid-cols-2 ${flip ? 'lg:[&>*:first-child]:order-2' : ''}`}>
+    <div className={stacked ? 'h-full' : 'space-y-8'}>
+      <Reveal
+        className={
+          stacked
+            ? 'flex h-full flex-col gap-6'
+            : `grid items-start gap-12 lg:grid-cols-2 ${flip ? 'lg:[&>*:first-child]:order-2' : ''}`
+        }
+      >
         {/* Product Image Card */}
         <div className="relative overflow-hidden leaf-radius shadow-xl bg-shell-100 border border-shell-200 group">
           <img
@@ -337,7 +349,7 @@ function Row({ p, flip, index }) {
         </div>
 
         {/* Product Content & Interactive Variant Selector */}
-        <div>
+        <div className={stacked ? 'flex-1' : undefined}>
           {(p.categories || []).length > 0 && (
             <div className="mb-3 flex flex-wrap gap-2">
               {p.categories.map((c) => (
@@ -352,7 +364,7 @@ function Row({ p, flip, index }) {
           )}
 
           <div className="flex flex-wrap items-center gap-3">
-            <h2 className="text-3xl sm:text-4xl font-bold text-shell-900">{p.name}</h2>
+            <h2 className={stacked ? 'text-2xl sm:text-3xl font-bold text-shell-900' : 'text-3xl sm:text-4xl font-bold text-shell-900'}>{p.name}</h2>
             {displayBadge && (
               <span className="rounded-full bg-leaf-100 border border-leaf-300 px-3 py-1 text-xs font-bold text-leaf-900">
                 {displayBadge}
@@ -377,7 +389,7 @@ function Row({ p, flip, index }) {
                 </span>
               </div>
 
-              <div className="mt-3 grid gap-2.5 sm:grid-cols-2">
+              <div className={`mt-3 grid gap-2.5 ${stacked ? 'sm:grid-cols-2' : 'sm:grid-cols-2'}`}>
                 {variantList.map((v, idx) => {
                   const isSelected = idx === selectedIdx;
                   return (
@@ -417,7 +429,7 @@ function Row({ p, flip, index }) {
             </div>
           )}
 
-          <p className="mt-4 text-base sm:text-lg text-shell-700 leading-relaxed">{displayShort}</p>
+          <p className={`mt-4 text-shell-700 leading-relaxed ${stacked ? 'text-sm sm:text-base' : 'text-base sm:text-lg'}`}>{displayShort}</p>
 
           {!isCoirPithBlock && Object.keys(displaySpecs).length > 0 && (
             <div className="mt-6">
@@ -473,9 +485,15 @@ export default function Products() {
         {items.length === 0 && (
           <p className="py-16 text-center text-shell-600">Our catalogue is being updated. Please check back soon.</p>
         )}
-        {items.map((p, i) => (
-          <Row key={p.slug || p._id || p.id || i} p={p} flip={i % 2 === 1} index={i} />
+        {items.map((p, i) => ({ p, i })).filter(({ p, i }) => isVisualizerProduct(p, i)).map(({ p, i }) => (
+          <Row key={p.slug || p._id || p.id || i} p={p} flip={false} index={i} />
         ))}
+        {/* All other products: image on top, info below, two products per row */}
+        <div className="grid items-stretch gap-x-8 gap-y-14 md:grid-cols-2">
+          {items.map((p, i) => ({ p, i })).filter(({ p, i }) => !isVisualizerProduct(p, i)).map(({ p, i }) => (
+            <Row key={p.slug || p._id || p.id || i} p={p} flip={false} index={i} stacked />
+          ))}
+        </div>
       </div>
     </>
   );
