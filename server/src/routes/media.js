@@ -67,7 +67,8 @@ function optimizeCloudinaryUrl(url) {
   }
   const isVideo = url.includes('/video/upload/') || /\.(mp4|webm|mov)$/i.test(url);
   if (isVideo) {
-    return url.replace('/upload/', '/upload/f_mp4,vc_auto,q_auto:good,w_1920,c_limit/');
+    // Videos are compressed at upload time; on-the-fly transforms can be refused for large sources, so serve as-is
+    return url;
   }
   return url.replace('/upload/', '/upload/f_auto,q_auto:good,w_1920,c_limit/');
 }
@@ -128,49 +129,46 @@ router.post('/upload', requireAdmin, csrfGuard, (req, res) => {
     // If Cloudinary is configured, upload with transformation flags and delete local temp file
     // Large videos (>50 MB) use chunked upload_large and auto-compress down to standard 1080p web bitrate
     if (hasCloudinary) {
-      try {
-        const isVideo = req.file.mimetype.startsWith('video/');
-        const isLarge = req.file.size > 20 * 1024 * 1024;
-        const uploadFn = (fileToUpload, opts) =>
-          isVideo || isLarge
-            ? cloudinary.uploader.upload_large(fileToUpload, opts)
-            : cloudinary.uploader.upload(fileToUpload, opts);
+      const isVideo = req.file.mimetype.startsWith('video/');
+      const baseOpts = {
+        folder: 'harwest_uploads',
+        resource_type: isVideo ? 'video' : 'image',
+        chunk_size: 6 * 1024 * 1024,
+      };
+      const send = (opts) =>
+        isVideo || req.file.size > 20 * 1024 * 1024
+          ? cloudinary.uploader.upload_large(full, opts)
+          : cloudinary.uploader.upload(full, opts);
 
-        const result = await uploadFn(full, {
-          folder: 'harwest_uploads',
-          resource_type: isVideo ? 'video' : 'image',
-          chunk_size: 6 * 1024 * 1024,
-          transformation: isVideo
-            ? [
-                {
-                  width: 1920,
-                  crop: 'limit',
-                  quality: 'auto:good',
-                  bit_rate: '2500k',
-                  fetch_format: 'auto',
-                },
-              ]
-            : [
-                {
-                  width: 1920,
-                  crop: 'limit',
-                  quality: 'auto:good',
-                  fetch_format: 'auto',
-                },
-              ],
-        });
+      try {
+        let result;
+        if (isVideo) {
+          // Attempt 1: compress on ingest (1080p cap, auto quality). Attempt 2: store original if Cloudinary refuses to transform it.
+          try {
+            result = await send({
+              ...baseOpts,
+              transformation: [{ width: 1920, height: 1080, crop: 'limit', quality: 'auto:good' }],
+            });
+          } catch (compressErr) {
+            console.warn('[media] Video compress-on-upload failed, retrying with original:', compressErr?.message || compressErr);
+            result = await send(baseOpts);
+          }
+        } else {
+          result = await send({
+            ...baseOpts,
+            transformation: [{ width: 1920, crop: 'limit', quality: 'auto:good', fetch_format: 'auto' }],
+          });
+        }
         try { fs.unlinkSync(full); } catch {}
 
         const finalUrl = optimizeCloudinaryUrl(result.secure_url);
-        return res.json({
-          url: finalUrl,
-          compressed: isVideo && req.file.size > (config.maxUploadMb || 50) * 1024 * 1024,
-          originalSize: req.file.size,
-        });
+        return res.json({ url: finalUrl, originalSize: req.file.size });
       } catch (cloudErr) {
         console.error('[media] Cloudinary upload error:', cloudErr);
-        // Fall back to local URL if Cloudinary upload failed
-        return res.json({ url: `/uploads/${req.file.filename}` });
+        try { fs.unlinkSync(full); } catch {}
+        const reason = cloudErr?.message || cloudErr?.error?.message || 'unknown error';
+        // Never silently save a local /uploads path for videos: it cannot play on the deployed site
+        return res.status(502).json({ error: `Cloud upload failed: ${reason}` });
       }
     }
 

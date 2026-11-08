@@ -2407,7 +2407,8 @@ function MediaCard({ id, meta, current, overridden, onChanged, onUpdateLocally, 
       setMsg(ok);
       await onChanged();
     } catch (e) {
-      setMsg(e.message);
+      setMsg('❌ ' + e.message);
+      window.alert('Upload / save failed: ' + e.message);
     }
     setProgress(null);
     setBusy(false);
