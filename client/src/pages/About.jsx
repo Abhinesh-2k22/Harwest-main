@@ -54,8 +54,17 @@ export default function About() {
             <h2 className="mt-2 text-3xl font-bold tracking-tight text-shell-900 sm:text-4xl">
               Sustainable Coir Solutions, Rooted in Tropical India
             </h2>
-            <p className="mt-4 text-shell-700 leading-relaxed">
-              At {SITE.name}, we manufacture premium coconut-based growing mediums designed for optimal plant health and commercial crop yield. We collaborate closely with smallholder coconut farmers in Pollachi to ensure high-quality raw materials and support sustainable farming livelihoods.
+            <p className="mt-4 text-shell-800 leading-relaxed font-semibold text-leaf-800">
+              HARWEST is a blend of two meaningful words – HARVEST + WEST.
+            </p>
+            <p className="mt-3 text-shell-700 leading-relaxed">
+              <strong className="text-shell-900">WEST</strong> represents the Western Ghats, particularly Pollachi, Tamil Nadu, a region renowned for its rich coconut-growing heritage. This is where our journey begins, transforming carefully sourced coconut resources into premium-quality cocopeat for global markets.
+            </p>
+            <p className="mt-3 text-shell-700 leading-relaxed">
+              <strong className="text-shell-900">HARVEST</strong> reflects our purpose – helping growers achieve healthier plant growth, greater productivity and better yields.
+            </p>
+            <p className="mt-4 border-l-2 border-leaf-600 pl-3.5 font-head text-sm sm:text-base font-bold text-leaf-900 italic bg-leaf-50/50 py-1.5 rounded-r-lg">
+              HARWEST – Rooted in the Western Ghats. Growing Better Harvests Worldwide.
             </p>
             <p className="mt-3 text-shell-700 leading-relaxed">
               Our commitment to environmental stewardship drives us to prioritize tropical solar drying and water recycling in our production processes, minimizing our carbon and environmental footprint. Our products stand out for their superior quality, low electrical conductivity, and eco-conscious nature.

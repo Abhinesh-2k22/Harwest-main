@@ -141,21 +141,23 @@ const HYDROPONIC_CROPS = [
     ),
   },
   {
-    name: 'Aubergines',
+    name: 'Cannabis',
     svg: (
       <svg viewBox="0 0 120 120" className={cropSvgCls}>
-        <g stroke="#1b3b28" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
-          <path
-            d="M36 34 C46 30, 68 42, 82 58 C96 74, 92 95, 74 98 C54 101, 38 82, 33 62 C29 46, 30 37, 36 34 Z"
-            fill="#84438f"
-          />
-          <path d="M68 56 C80 68, 84 82, 76 90" fill="none" stroke="#a665b0" strokeWidth="3" />
-          {/* Green cap */}
-          <path
-            d="M30 28 L36 34 L31 48 L41 41 L47 50 L49 39 L58 39 L46 31 L36 32 Z"
-            fill="#5ca356"
-          />
-          <path d="M34 32 L26 24" strokeWidth="3.2" />
+        <g stroke="#1b3b28" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="#6bb344">
+          {/* Center leaflet */}
+          <path d="M60 82 C54 60, 55 34, 60 18 C65 34, 66 60, 60 82 Z" />
+          {/* Upper left & right leaflets */}
+          <path d="M60 82 C46 66, 36 46, 29 33 C43 42, 54 60, 60 82 Z" />
+          <path d="M60 82 C74 66, 84 46, 91 33 C77 42, 66 60, 60 82 Z" />
+          {/* Mid left & right leaflets */}
+          <path d="M60 82 C44 78, 29 73, 20 68 C33 68, 48 73, 60 82 Z" />
+          <path d="M60 82 C76 78, 91 73, 100 68 C87 68, 72 73, 60 82 Z" />
+          {/* Lower small leaflets */}
+          <path d="M60 82 C51 86, 42 90, 36 93 C43 86, 52 83, 60 82 Z" />
+          <path d="M60 82 C69 86, 78 90, 84 93 C77 86, 68 83, 60 82 Z" />
+          {/* Stem */}
+          <path d="M60 82 L60 102" strokeWidth="2.8" />
         </g>
       </svg>
     ),
@@ -203,23 +205,21 @@ const HYDROPONIC_CROPS = [
     ),
   },
   {
-    name: 'Cannabis',
+    name: 'Aubergines',
     svg: (
       <svg viewBox="0 0 120 120" className={cropSvgCls}>
-        <g stroke="#1b3b28" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round" fill="#6bb344">
-          {/* Center leaflet */}
-          <path d="M60 82 C54 60, 55 34, 60 18 C65 34, 66 60, 60 82 Z" />
-          {/* Upper left & right leaflets */}
-          <path d="M60 82 C46 66, 36 46, 29 33 C43 42, 54 60, 60 82 Z" />
-          <path d="M60 82 C74 66, 84 46, 91 33 C77 42, 66 60, 60 82 Z" />
-          {/* Mid left & right leaflets */}
-          <path d="M60 82 C44 78, 29 73, 20 68 C33 68, 48 73, 60 82 Z" />
-          <path d="M60 82 C76 78, 91 73, 100 68 C87 68, 72 73, 60 82 Z" />
-          {/* Lower small leaflets */}
-          <path d="M60 82 C51 86, 42 90, 36 93 C43 86, 52 83, 60 82 Z" />
-          <path d="M60 82 C69 86, 78 90, 84 93 C77 86, 68 83, 60 82 Z" />
-          {/* Stem */}
-          <path d="M60 82 L60 102" strokeWidth="2.8" />
+        <g stroke="#1b3b28" strokeWidth="2.4" strokeLinecap="round" strokeLinejoin="round">
+          <path
+            d="M36 34 C46 30, 68 42, 82 58 C96 74, 92 95, 74 98 C54 101, 38 82, 33 62 C29 46, 30 37, 36 34 Z"
+            fill="#84438f"
+          />
+          <path d="M68 56 C80 68, 84 82, 76 90" fill="none" stroke="#a665b0" strokeWidth="3" />
+          {/* Green cap */}
+          <path
+            d="M30 28 L36 34 L31 48 L41 41 L47 50 L49 39 L58 39 L46 31 L36 32 Z"
+            fill="#5ca356"
+          />
+          <path d="M34 32 L26 24" strokeWidth="3.2" />
         </g>
       </svg>
     ),
@@ -349,7 +349,7 @@ export default function Home() {
               Explore Products <ArrowRight size={18} />
             </Button>
             <Button to="/contact" variant="ghost" className="backdrop-blur-md hover:bg-white/15 transition duration-300">
-              Request a Sample
+              Request Quote
             </Button>
           </div>
 
@@ -380,9 +380,8 @@ export default function Home() {
               <Reveal
                 key={crop.name}
                 delay={idx * 50}
-                className={`group flex-col items-center justify-center ${
-                  idx >= 8 ? 'hidden md:flex' : 'flex'
-                }`}
+                className={`group flex-col items-center justify-center ${idx >= 8 ? 'hidden md:flex' : 'flex'
+                  }`}
               >
                 <div className="flex h-16 w-16 sm:h-24 sm:w-24 md:h-32 md:w-32 items-center justify-center rounded-2xl sm:rounded-3xl bg-shell-50/70 border border-shell-200/70 p-2 sm:p-3 shadow-sm transition-all duration-300 group-hover:border-leaf-300 group-hover:bg-leaf-50/50 group-hover:shadow-md">
                   {crop.svg}
