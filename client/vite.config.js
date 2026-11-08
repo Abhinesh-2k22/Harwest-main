@@ -45,7 +45,7 @@ function autoStartBackendPlugin() {
         console.log(`\n🌱 [harwest] Auto-starting backend API server on ${BACKEND_TARGET}...`);
         const proc = spawn(process.execPath, ['--watch-path=src', 'src/index.js'], {
           cwd: serverDir,
-          stdio: 'inherit',
+          stdio: ['ignore', 'inherit', 'inherit'],
           windowsHide: true,
         });
         globalThis.__harwestBackendProc = proc;
@@ -60,7 +60,7 @@ function autoStartBackendPlugin() {
             if (globalThis.__harwestBackendProc) {
               try {
                 globalThis.__harwestBackendProc.kill();
-              } catch {}
+              } catch { }
               globalThis.__harwestBackendProc = null;
             }
           };

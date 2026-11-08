@@ -136,16 +136,14 @@ function BlockSpecVisualizer({ selectedKey, onSelectKey }) {
                 key={item.key}
                 type="button"
                 onClick={() => onSelectKey(item.key)}
-                className={`relative flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold transition-all duration-300 ${
-                  isSelected
+                className={`relative flex items-center gap-2 rounded-xl px-4 py-2.5 text-xs sm:text-sm font-bold transition-all duration-300 ${isSelected
                     ? 'bg-emerald-500 text-leaf-950 shadow-lg shadow-emerald-950/50 scale-[1.02]'
                     : 'text-white/80 hover:text-white hover:bg-white/10'
-                }`}
+                  }`}
               >
                 <span
-                  className={`h-2 w-2 rounded-full ${
-                    isSelected ? 'bg-leaf-950 animate-ping' : 'bg-emerald-400/60'
-                  }`}
+                  className={`h-2 w-2 rounded-full ${isSelected ? 'bg-leaf-950 animate-ping' : 'bg-emerald-400/60'
+                    }`}
                 />
                 {item.tag}
               </button>
@@ -376,8 +374,8 @@ function Row({ p, flip, index, stacked = false }) {
           {/* Interactive Clickable Product Types */}
           {variantList.length > 0 && (
             <div
-              className={`mt-3.5 rounded-xl border border-leaf-200/90 bg-leaf-50/50 shadow-xs ${
-                stacked ? 'p-3' : 'mt-5 rounded-2xl p-4 shadow-sm'
+              className={`rounded-xl border border-leaf-200/90 bg-leaf-50/50 ${
+                stacked ? 'mt-3.5 p-3 shadow-xs' : 'mt-5 rounded-2xl p-4 shadow-sm'
               }`}
             >
               <div className="flex items-center justify-between gap-2">
@@ -388,17 +386,21 @@ function Row({ p, flip, index, stacked = false }) {
                   </span>
                   Available Product Types
                 </p>
-                {variantList.length > 1 && (
-                  <span className="inline-flex items-center gap-1 rounded-full bg-white px-2 py-0.5 text-[10px] font-semibold text-leaf-700 border border-leaf-200 shadow-2xs">
+                {variantList.length > 1 ? (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-0.5 text-[10px] font-semibold text-leaf-700 border border-leaf-200 shadow-2xs">
                     <MousePointerClick size={11} className="text-leaf-600 animate-bounce" />
                     {stacked ? 'Switch view' : 'Click type to switch view'}
+                  </span>
+                ) : (
+                  <span className="inline-flex items-center gap-1 rounded-full bg-white px-2.5 py-0.5 text-[10px] font-semibold text-leaf-700 border border-leaf-200 shadow-2xs">
+                    Export Standard
                   </span>
                 )}
               </div>
 
               <div
                 className={`mt-2.5 grid gap-2 ${
-                  stacked && variantList.length <= 1 ? 'grid-cols-1' : 'sm:grid-cols-2'
+                  variantList.length === 1 ? 'grid-cols-1' : 'sm:grid-cols-2'
                 }`}
               >
                 {variantList.map((v, idx) => {
@@ -410,7 +412,7 @@ function Row({ p, flip, index, stacked = false }) {
                       onClick={() => setSelectedIdx(idx)}
                       aria-pressed={isSelected}
                       className={`group flex items-center justify-between gap-2 rounded-lg border text-left font-bold transition-all duration-200 ${
-                        stacked ? 'px-3 py-2 text-xs' : 'px-3.5 py-3 text-sm rounded-xl'
+                        stacked ? 'px-3 py-2 text-xs sm:text-sm' : 'px-3.5 py-3 text-sm rounded-xl'
                       } ${
                         isSelected
                           ? 'border-leaf-700 bg-leaf-800 text-white shadow-sm ring-1 ring-leaf-400/50'
@@ -464,22 +466,24 @@ function Row({ p, flip, index, stacked = false }) {
             </div>
           )}
 
-          <div className={`flex flex-wrap items-center gap-4 ${stacked ? 'mt-auto pt-5' : 'mt-8'}`}>
-            <Button to="/contact">
-              Request Quote <ArrowRight size={16} />
-            </Button>
-          </div>
+        <div className={`flex flex-wrap items-center gap-4 ${stacked ? 'mt-auto pt-5' : 'mt-8'}`}>
+          <Button to="/contact">
+            Request Quote <ArrowRight size={16} />
+          </Button>
         </div>
-      </Reveal>
-
-      {/* Low EC vs High EC Visualizer right beneath Product 1 */}
-      {isCoirPithBlock && (
-        <BlockSpecVisualizer
-          selectedKey={currentVisualizerKey}
-          onSelectKey={handleVisualizerSelect}
-        />
-      )}
     </div>
+      </Reveal >
+
+    {/* Low EC vs High EC Visualizer right beneath Product 1 */ }
+  {
+    isCoirPithBlock && (
+      <BlockSpecVisualizer
+        selectedKey={currentVisualizerKey}
+        onSelectKey={handleVisualizerSelect}
+      />
+    )
+  }
+    </div >
   );
 }
 
