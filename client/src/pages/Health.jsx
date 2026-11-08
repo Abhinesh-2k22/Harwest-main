@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { CheckCircle2, XCircle, RefreshCw, Server, Globe } from 'lucide-react';
 import { api } from '../lib/api';
+import SEO from '../components/SEO';
 
 export default function Health() {
   const [backendStatus, setBackendStatus] = useState({ loading: true, ok: false, data: null, error: null, pingMs: null });
@@ -26,6 +27,7 @@ export default function Health() {
 
   return (
     <div className="min-h-[70vh] bg-shell-50 py-16 px-6">
+      <SEO title="System Status" path="/health" noindex />
       <div className="mx-auto max-w-2xl">
         <div className="rounded-3xl border border-shell-200 bg-white p-8 shadow-sm">
           <div className="flex items-center justify-between border-b border-shell-100 pb-6">

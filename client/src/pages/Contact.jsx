@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Phone, Mail, MapPin, MessageCircle, CheckCircle2, Send, AlertCircle, ChevronDown, Check, Globe, Building2 } from 'lucide-react';
 import { PageHero } from '../components/ui';
+import SEO from '../components/SEO';
 import { SITE } from '../config/siteContent';
 import { useProducts } from '../lib/useProducts';
 import { api } from '../lib/api';
@@ -163,6 +164,24 @@ export default function Contact() {
 
   return (
     <>
+      <SEO
+        title="Contact & Request Container Quote — Pollachi Export Desk"
+        description="Contact HarWest Coir Substrates in Pollachi, Tamil Nadu for 20ft/40ft HC container CIF pricing, custom hydroponic grow bag specs, or factory evaluation samples."
+        keywords="contact HarWest Coir, request cocopeat container quote, buy 5kg coir pith block bulk, Pollachi coir exporter contact"
+        path="/contact"
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'ContactPage',
+          name: 'Contact HarWest Coir Substrates',
+          url: 'https://harwestcoirs.com/contact',
+          mainEntity: {
+            '@type': 'Organization',
+            name: 'HarWest Coir Substrates',
+            email: SITE.email,
+            telephone: SITE.phone,
+          },
+        }}
+      />
       <PageHero
         breadcrumb="Contact Us"
         eyebrow="Get In Touch"

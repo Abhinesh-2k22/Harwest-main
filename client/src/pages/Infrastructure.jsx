@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Building2, Droplets, MapPin, ArrowRight, CheckCircle2, X, Maximize2 } from 'lucide-react';
 import { PageHero, Button, SectionTitle } from '../components/ui';
+import SEO from '../components/SEO';
 import { Reveal } from '../lib/motion';
 import { api } from '../lib/api';
 import { DEFAULT_INFRASTRUCTURE } from '../config/siteContent';
@@ -54,6 +55,12 @@ export default function Infrastructure() {
 
   return (
     <>
+      <SEO
+        title="Coir Processing Infrastructure & Washing Facility in Pollachi"
+        description="Tour HarWest's coco peat manufacturing units in Pollachi, Tamil Nadu: freshwater low-EC washing beds, concrete solar drying yards, rotary screening, and 5:1 hydraulic block machines."
+        keywords="coco peat factory Pollachi, coir washing facility Tamil Nadu, low EC cocopeat processing, 5kg block hydraulic machine, coir export facility India"
+        path="/infrastructure"
+      />
       <PageHero
         breadcrumb="Infrastructure"
         eyebrow="Pollachi · Tamil Nadu · India"

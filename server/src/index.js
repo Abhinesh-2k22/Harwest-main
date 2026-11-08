@@ -9,6 +9,7 @@ import mongoSanitize from 'express-mongo-sanitize';
 import rateLimit from 'express-rate-limit';
 import mongoose from 'mongoose';
 import { config } from './config.js';
+import { Blog } from './models.js';
 import authRoutes from './routes/auth.js';
 import mediaRoutes from './routes/media.js';
 import enquiryRoutes from './routes/enquiries.js';
@@ -103,6 +104,78 @@ const healthCheckHandler = (_req, res) => {
 
 app.get('/health', healthCheckHandler);
 app.get('/api/health', healthCheckHandler);
+
+// Dynamic XML Sitemap (includes all static routes + live published blog posts from MongoDB)
+const DEFAULT_BLOG_SLUGS = [
+  { slug: 'what-to-check-before-buying-coco-peat-block-for-sale', lastmod: '2026-10-24' },
+  { slug: 'how-to-identify-high-quality-coco-coir-before-buying', lastmod: '2026-10-20' },
+  { slug: 'what-is-multiple-washed-coco-coir-and-why-does-it-matter', lastmod: '2026-10-14' },
+  { slug: 'cannabis-coco-coir-what-makes-it-ideal-for-hydroponics', lastmod: '2026-10-08' },
+];
+
+const sitemapHandler = async (_req, res) => {
+  const siteBase = 'https://harwestcoirs.com';
+  const today = new Intl.DateTimeFormat('en-CA', { timeZone: 'Asia/Kolkata' }).format(new Date());
+  const staticPages = [
+    { path: '/', priority: '1.0', changefreq: 'weekly', lastmod: today },
+    { path: '/products', priority: '0.9', changefreq: 'weekly', lastmod: today },
+    { path: '/infrastructure', priority: '0.8', changefreq: 'monthly', lastmod: today },
+    { path: '/about', priority: '0.8', changefreq: 'monthly', lastmod: today },
+    { path: '/blog', priority: '0.8', changefreq: 'weekly', lastmod: today },
+    { path: '/contact', priority: '0.8', changefreq: 'monthly', lastmod: today },
+  ];
+
+  let blogEntries = [...DEFAULT_BLOG_SLUGS];
+  if (mongoose.connection.readyState === 1) {
+    try {
+      const dbBlogs = await Blog.find({ isPublished: { $ne: false } })
+        .select('slug publishedAt updatedAt')
+        .lean();
+      if (dbBlogs.length > 0) {
+        const seen = new Set();
+        blogEntries = [];
+        for (const b of dbBlogs) {
+          if (b.slug && !seen.has(b.slug)) {
+            seen.add(b.slug);
+            const lastmod =
+              (b.updatedAt && new Date(b.updatedAt).toISOString().slice(0, 10)) ||
+              (b.publishedAt && /^\d{4}-\d{2}-\d{2}$/.test(b.publishedAt) ? b.publishedAt : today);
+            blogEntries.push({ slug: b.slug, lastmod });
+          }
+        }
+      }
+    } catch {
+      // Fallback to default blog slugs
+    }
+  }
+
+  const urlsXml = [
+    ...staticPages.map(
+      (p) => `  <url>
+    <loc>${siteBase}${p.path}</loc>
+    <lastmod>${p.lastmod}</lastmod>
+    <changefreq>${p.changefreq}</changefreq>
+    <priority>${p.priority}</priority>
+  </url>`
+    ),
+    ...blogEntries.map(
+      (b) => `  <url>
+    <loc>${siteBase}/blog/${encodeURIComponent(b.slug)}</loc>
+    <lastmod>${b.lastmod}</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>`
+    ),
+  ].join('\n');
+
+  const xml = `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${urlsXml}\n</urlset>`;
+  res.header('Content-Type', 'application/xml; charset=utf-8');
+  res.header('Cache-Control', 'public, max-age=3600');
+  res.send(xml);
+};
+
+app.get('/sitemap.xml', sitemapHandler);
+app.get('/api/sitemap.xml', sitemapHandler);
 
 // Single source of truth for IST Time across the entire app
 app.get('/api/time', (_req, res) => {

@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { ArrowRight, CheckCircle2, ChevronRight, MousePointerClick, SlidersHorizontal, Layers, Droplets, Zap, Expand } from 'lucide-react';
 import { PageHero, Button } from '../components/ui';
+import SEO from '../components/SEO';
 import { Reveal } from '../lib/motion';
 import { useProducts } from '../lib/useProducts';
 import { optimizeCloudinaryUrl } from '../lib/media';
@@ -473,6 +474,34 @@ export default function Products() {
 
   return (
     <>
+      <SEO
+        title="Coco Peat 5kg Blocks, Hydroponic Grow Bags & Coir Products Catalogue"
+        description="Explore HarWest's export-grade coir catalogue: 5 kg Low EC & High EC cocopeat blocks, hydroponic grow bags, coco husk chips, and coir fibre from Pollachi, India."
+        keywords="5kg cocopeat block specs, low EC vs high EC coir pith, hydroponic coir grow bags supplier, coco husk chips exporter, coir substrate catalogue"
+        path="/products"
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'ItemList',
+          name: 'HarWest Coir Substrates Product Catalogue',
+          itemListElement: items.map((p, idx) => ({
+            '@type': 'ListItem',
+            position: idx + 1,
+            item: {
+              '@type': 'Product',
+              name: p.name,
+              description: p.short,
+              brand: {
+                '@type': 'Brand',
+                name: 'HarWest Coir Substrates',
+              },
+              manufacturer: {
+                '@type': 'Organization',
+                name: 'HarWest Coir Substrates',
+              },
+            },
+          })),
+        }}
+      />
       <PageHero
         breadcrumb="Products"
         eyebrow="Technical Catalogue"

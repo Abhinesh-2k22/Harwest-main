@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Calendar, User, ArrowRight, Tag, BookOpen, Search } from 'lucide-react';
 import { PageHero } from '../components/ui';
+import SEO from '../components/SEO';
 import { DEFAULT_BLOGS } from '../config/siteContent';
 import { api } from '../lib/api';
 import { Reveal } from '../lib/motion';
@@ -36,6 +37,12 @@ export default function Blog() {
 
   return (
     <>
+      <SEO
+        title="Coco Coir Agronomy Guides, Low-EC Washing & Hydroponic Tips"
+        description="Read expert articles from the HarWest Agronomy Team on buying 5kg coco peat blocks, low-EC washing, buffering coir for hydroponics, and commercial greenhouse substrates."
+        keywords="coco coir blog, how to buy cocopeat block, washed vs buffered coco coir, hydroponic substrate guide, EC in coco peat"
+        path="/blog"
+      />
       <PageHero
         breadcrumb="Blog"
         eyebrow="Industry Insights"

@@ -1,6 +1,7 @@
 import { ShieldCheck, Target, Eye, Sun, Droplets, Recycle, Leaf, Sparkles, CheckCircle2 } from 'lucide-react';
 import { useAsset } from '../context/MediaContext';
 import { PageHero, SectionTitle, Button } from '../components/ui';
+import SEO from '../components/SEO';
 import { Reveal } from '../lib/motion';
 import { SITE, CERTIFICATIONS } from '../config/siteContent';
 
@@ -10,6 +11,13 @@ export default function About() {
 
   return (
     <>
+      <SEO
+        title="About HarWest — Sustainable Coir Substrates Manufacturer in Pollachi"
+        description="Rooted in the coconut heartland of Pollachi, India, HarWest Coir Substrates crafts 100% natural, peat-free, RHP & SA 8000 compliant cocopeat growing media exported to 25+ countries."
+        keywords="about HarWest Coir, Pollachi cocopeat manufacturer, sustainable peat-free growing media, SA 8000 coir exporter India"
+        path="/about"
+        image={factory}
+      />
       <PageHero
         breadcrumb="About Us"
         eyebrow="About HarWest"

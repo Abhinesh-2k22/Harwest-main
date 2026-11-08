@@ -3,6 +3,7 @@ import { useParams, Link } from 'react-router-dom';
 import { Calendar, User, ArrowLeft, Share2, Linkedin, Twitter, MessageCircle, Copy, Check, Clock, ChevronRight } from 'lucide-react';
 import { DEFAULT_BLOGS } from '../config/siteContent';
 import { api } from '../lib/api';
+import SEO from '../components/SEO';
 
 export default function BlogPost() {
   const { slug } = useParams();
@@ -63,6 +64,38 @@ export default function BlogPost() {
 
   return (
     <article className="pt-32 pb-6 sm:pb-8">
+      <SEO
+        title={post.title}
+        description={post.summary || `${post.title} — Technical agronomy guide by ${post.author || 'HarWest Coir Substrates'}.`}
+        keywords={`${post.category || 'coco coir'}, ${post.title}, cocopeat guide, HarWest Coir`}
+        path={`/blog/${post.slug || slug}`}
+        image={post.coverImage || '/images/block.jpg'}
+        type="article"
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'BlogPosting',
+          headline: post.title,
+          description: post.summary || post.title,
+          image: post.coverImage || 'https://harwestcoirs.com/images/block.jpg',
+          datePublished: post.publishedAt || '2026-10-24',
+          author: {
+            '@type': 'Person',
+            name: post.author || 'HarWest Agronomy Team',
+          },
+          publisher: {
+            '@type': 'Organization',
+            name: 'HarWest Coir Substrates',
+            logo: {
+              '@type': 'ImageObject',
+              url: 'https://res.cloudinary.com/yi8e4nqo/image/upload/v1793173304/harwest/logo.jpg',
+            },
+          },
+          mainEntityOfPage: {
+            '@type': 'WebPage',
+            '@id': `https://harwestcoirs.com/blog/${post.slug || slug}`,
+          },
+        }}
+      />
       {/* HEADER SECTION (Inspired by kayacoir article page) */}
       <div className="mx-auto max-w-4xl px-6">
         {/* Breadcrumb */}

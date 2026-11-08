@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ChevronDown, ShieldCheck, CheckCircle2, Award, FileText, FlaskConical } from 'lucide-react';
 import { PageHero, SectionTitle, Button } from '../components/ui';
+import SEO from '../components/SEO';
 import { Reveal } from '../lib/motion';
 import { PROCESS, FAQ, CERTIFICATIONS } from '../config/siteContent';
 import { api } from '../lib/api';
@@ -45,6 +46,12 @@ export default function Quality() {
 
   return (
     <>
+      <SEO
+        title="Quality & Certifications — SA 8000, RHP & Low-EC Lab Verification"
+        description="Every HarWest coco peat batch is tested in-house for EC (<0.5 mS/cm), pH (5.5–6.5), expansion volume, and pathogen purity under SA 8000 and RHP quality protocols."
+        keywords="RHP certified cocopeat, SA 8000 coir manufacturer, low EC cocopeat testing, coco coir quality standards"
+        path="/quality"
+      />
       <PageHero
         breadcrumb="Quality & Certifications"
         eyebrow="Certified Excellence"

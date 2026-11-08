@@ -6,6 +6,7 @@ import { Reveal } from '../lib/motion';
 import { Button, SectionTitle } from '../components/ui';
 import ProductShowcase from '../components/ProductShowcase';
 import FactoryVideoPlayer from '../components/FactoryVideoPlayer';
+import SEO from '../components/SEO';
 import { useProducts } from '../lib/useProducts';
 
 const cropSvgCls =
@@ -284,6 +285,25 @@ export default function Home() {
 
   return (
     <>
+      <SEO
+        title="Premium Cocopeat Blocks, Coir Grow Bags & Substrates Exporter India"
+        description="HarWest Coir Substrates — Pollachi manufacturer & global exporter of triple-washed Low EC 5 kg cocopeat blocks, hydroponic coir grow bags, coco husk chips, and natural coir fibre."
+        keywords="cocopeat exporter India, 5kg low EC cocopeat block, hydroponic coir grow bags, coco husk chips Pollachi, coco peat manufacturer Tamil Nadu, HarWest Coir Substrates"
+        path="/"
+        image={hero}
+        jsonLd={{
+          '@context': 'https://schema.org',
+          '@type': 'FAQPage',
+          mainEntity: FAQ.slice(0, 5).map((f) => ({
+            '@type': 'Question',
+            name: f.q,
+            acceptedAnswer: {
+              '@type': 'Answer',
+              text: f.a,
+            },
+          })),
+        }}
+      />
       {/* HERO SECTION */}
       <section className="grain relative isolate flex min-h-[94vh] items-center overflow-hidden bg-leaf-950 text-white">
         {heroVideo ? (
